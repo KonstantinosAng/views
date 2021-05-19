@@ -51,7 +51,7 @@ const createWindow = async () => {
     width: Number.parseInt(mainWindow.getBounds().width / 4),
     height: mainWindow.getBounds().height - 40 - space
   })
-  await mobile_view.webContents.loadURL('https://google.com')
+  await mobile_view.webContents.loadURL('https://github.com')
   mobile_view.setAutoResize({width: true});
   /* Handle mobile view forward backward */
   mainWindow.webContents.send("mobileId", mobile_view.webContents.id);
@@ -79,7 +79,7 @@ const createWindow = async () => {
     width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
     height: mainWindow.getBounds().height - 40 - space
   })
-  await main_view.webContents.loadURL('https://google.com')
+  await main_view.webContents.loadURL('https://github.com')
   main_view.setAutoResize({width: true});
   /* Handle main view forward backward */
   mainWindow.webContents.send("mainId", main_view.webContents.id);
@@ -121,6 +121,66 @@ const createWindow = async () => {
       y: space,
       width: Number.parseInt(newBounds.width - newBounds.width / 4),
       height: newBounds.height - 40 - space
+    })
+  })
+
+  mainWindow.on('enter-full-screen', () => {
+    mobile_view.setBounds({
+      x: 0,
+      y: space,
+      width: Number.parseInt(mainWindow.getBounds().width / 4),
+      height: mainWindow.getBounds().height - 40 - space
+    })
+    main_view.setBounds({
+      x: Number.parseInt(mainWindow.getBounds().width / 4),
+      y: space,
+      width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
+      height: mainWindow.getBounds().height - 40 - space
+    })
+  })
+
+  mainWindow.on('leave-full-screen', () => {
+    mobile_view.setBounds({
+      x: 0,
+      y: space,
+      width: Number.parseInt(mainWindow.getBounds().width / 4),
+      height: mainWindow.getBounds().height - 40 - space
+    })
+    main_view.setBounds({
+      x: Number.parseInt(mainWindow.getBounds().width / 4),
+      y: space,
+      width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
+      height: mainWindow.getBounds().height - 40 - space
+    })
+  })
+
+  mainWindow.on('maximize', () => {
+    mobile_view.setBounds({
+      x: 0,
+      y: space,
+      width: Number.parseInt(mainWindow.getBounds().width / 4),
+      height: mainWindow.getBounds().height - 40 - space
+    })
+    main_view.setBounds({
+      x: Number.parseInt(mainWindow.getBounds().width / 4),
+      y: space,
+      width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
+      height: mainWindow.getBounds().height - 40 - space
+    })
+  })
+
+  mainWindow.on('unmaximize', () => {
+    mobile_view.setBounds({
+      x: 0,
+      y: space,
+      width: Number.parseInt(mainWindow.getBounds().width / 4),
+      height: mainWindow.getBounds().height - 40 - space
+    })
+    main_view.setBounds({
+      x: Number.parseInt(mainWindow.getBounds().width / 4),
+      y: space,
+      width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
+      height: mainWindow.getBounds().height - 40 - space
     })
   })
 
