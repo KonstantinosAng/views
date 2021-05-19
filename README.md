@@ -1,6 +1,6 @@
 # WebViewPages
 
-An app that lets you see how your webapplication shows in Mobile view and Full view.
+An app that lets you see how your webapplication/webapp shows in Mobile view and Full view at the same time.
 
 ## Usage
 
