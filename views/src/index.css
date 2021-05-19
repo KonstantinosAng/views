@@ -30,22 +30,29 @@
   color: whitesmoke;
   cursor: pointer;
   margin-left: .5rem;
-  padding: 0 1rem 0 1rem;
+  padding: 0 1.1rem 0 1.1rem;
   background: midnightblue;
   border: 2px solid midnightblue;
   border-radius: 100vw;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 
 .url__input {
   margin-left: .5rem;
-  padding: 0 1rem 0 1rem;
+  padding: .2rem 1.5rem .2rem 1.5rem;
   border: 2px solid black;
   border-radius: 100vw;
   width: 50%;
   font-weight: bold;
   font-size: 1rem;
   color: black;
+}
+
+form {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: left;
 }
 
 .url__input:active, .url__input:focus {

@@ -4,7 +4,9 @@ const mobile_backButton = document.getElementById("mobile_back");
 const mobile_forwardButton = document.getElementById("mobile_forward");
 const main_backButton = document.getElementById("main_back");
 const main_forwardButton = document.getElementById("main_forward");
-const mock_button = document.getElementById('mock')
+const mock_button = document.getElementById('mock');
+const form = document.getElementById('url_input_form');
+const input = document.getElementById('url_input');
 
 let mobileId = -1;
 let mainId = -1;
@@ -41,4 +43,10 @@ main_backButton.onclick = () => {
 
 main_forwardButton.onclick = () => {
   ipcRenderer.send('main_goForward', mainId);
+}
+
+form.onsubmit = (event) => {
+  event.preventDefault();
+  const url = input.value;
+  ipcRenderer.send('getUrl', url)
 }

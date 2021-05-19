@@ -8,7 +8,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 const createWindow = async () => {
-  const space = 25;
+  const space = 30;
   const screenDimensions = electron.screen.getPrimaryDisplay();
   /* Main Window */
   const mainWindow = new BrowserWindow({
@@ -103,6 +103,11 @@ const createWindow = async () => {
     }
   })
   
+  ipcMain.on("getUrl", async (e, url) => {
+    await mobile_view.webContents.loadURL(url)
+    await main_view.webContents.loadURL(url)
+  })
+
   /* Resize bounds */
   mainWindow.on('will-resize', (_event, newBounds) => {    
     newBounds = screen.screenToDipRect(mainWindow, newBounds);
