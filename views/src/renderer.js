@@ -90,11 +90,11 @@ document.addEventListener('mouseup', () => {
 
 document.addEventListener('mousemove', (e) => {
   e.preventDefault();
-  if (isDown) {
+  if (isDown && e.clientX + x - 13 < 568 && e.clientX + x - 13 > 146) {
     resize.style.left = (e.clientX + x -13) + 'px';
     ipcRenderer.send('resize_drag', e.clientX + x);
     main_view.style.flex = 1 - (e.clientX + x) / window.innerWidth;
-    console.log(1-(e.clientX + x) / window.innerWidth)
+    console.log(e.clientX + x - 13)
   }
 });
 
