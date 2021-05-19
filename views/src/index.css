@@ -1,0 +1,53 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  width: 100%;
+  position: sticky;
+  justify-content: space-evenly;
+  z-index: 100;
+  background-color: whitesmoke;
+}
+
+.mobile__view {
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  flex: .3;
+}
+
+.main__view {
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  flex: .8;
+}
+
+.btn-test {
+  color: whitesmoke;
+  cursor: pointer;
+  margin-left: .5rem;
+  padding: 0 1rem 0 1rem;
+  background: midnightblue;
+  border: 2px solid midnightblue;
+  border-radius: 100vw;
+  font-size: 1.1rem;
+}
+
+.url__input {
+  margin-left: .5rem;
+  padding: 0 1rem 0 1rem;
+  border: 2px solid black;
+  border-radius: 100vw;
+  width: 50%;
+  font-weight: bold;
+  font-size: 1rem;
+  color: black;
+}
+
+.url__input:active, .url__input:focus {
+  outline: none;
+}
