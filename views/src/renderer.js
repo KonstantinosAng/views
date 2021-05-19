@@ -9,6 +9,8 @@ const form = document.getElementById('url_input_form');
 const input = document.getElementById('url_input');
 const message = document.getElementById('message');
 const devTools = document.getElementById('devTools');
+const resize = document.getElementById('resize');
+const main_view = document.getElementById('main_view_block');
 
 let mobileId = -1;
 let mainId = -1;
@@ -73,3 +75,29 @@ form.onsubmit = (event) => {
 devTools.onclick = (event) => {
   ipcRenderer.send("devTools");
 }
+
+var x = 0;
+var isDown = false;
+
+resize.addEventListener('mousedown', (e) => {
+  isDown = true;
+  x = resize.offsetLeft - e.clientX;
+});
+
+document.addEventListener('mouseup', () => {
+  isDown = false;
+});
+
+document.addEventListener('mousemove', (e) => {
+  e.preventDefault();
+  if (isDown) {
+    resize.style.left = (e.clientX + x -13) + 'px';
+    ipcRenderer.send('resize_drag', e.clientX + x);
+    main_view.style.flex = 1 - (e.clientX + x) / window.innerWidth;
+    console.log(1-(e.clientX + x) / window.innerWidth)
+  }
+});
+
+// ipcRenderer.on('resize_maximize', (e, x) => {
+//   resize.style.left = (x - 13) + 'px';
+// }

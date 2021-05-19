@@ -96,8 +96,8 @@ form {
   position: absolute;
   top: 0;
   left: 24.5%;
-  color: black;
+  color: deeppink;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   cursor: col-resize;
 }

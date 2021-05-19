@@ -137,6 +137,7 @@ const createWindow = async () => {
       width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
       height: mainWindow.getBounds().height - 40 - space
     })
+    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
   mainWindow.on('leave-full-screen', () => {
@@ -152,6 +153,7 @@ const createWindow = async () => {
       width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
       height: mainWindow.getBounds().height - 40 - space
     })
+    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
   mainWindow.on('maximize', () => {
@@ -167,6 +169,7 @@ const createWindow = async () => {
       width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
       height: mainWindow.getBounds().height - 40 - space
     })
+    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
   mainWindow.on('unmaximize', () => {
@@ -180,6 +183,22 @@ const createWindow = async () => {
       x: Number.parseInt(mainWindow.getBounds().width / 4),
       y: space,
       width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
+      height: mainWindow.getBounds().height - 40 - space
+    })
+    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+  })
+
+  ipcMain.on("resize_drag", (e, x) => {
+    mobile_view.setBounds({
+      x: 0,
+      y: space,
+      width: Number.parseInt(x),
+      height: mainWindow.getBounds().height - 40 - space
+    })
+    main_view.setBounds({
+      x: Number.parseInt(x),
+      y: space,
+      width: Number.parseInt(mainWindow.getBounds().width - x),
       height: mainWindow.getBounds().height - 40 - space
     })
   })
