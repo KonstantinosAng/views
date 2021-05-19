@@ -40,8 +40,6 @@ const createWindow = async () => {
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
   mainWindow.setIcon(path.join(__dirname, 'favicon.png'));
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools({detached: true});
   mainWindow.setFullScreen(false);
   mainWindow.maximize();
 
@@ -124,6 +122,17 @@ const createWindow = async () => {
       width: Number.parseInt(newBounds.width - newBounds.width / 4),
       height: newBounds.height - 40 - space
     })
+  })
+
+  /* Dev Tools toggle */
+  ipcMain.on("devTools", (e) => {
+    mainWindow.webContents.isDevToolsOpened()
+    if (!mainWindow.webContents.isDevToolsOpened()) {
+      // Open the DevTools.
+      mainWindow.webContents.openDevTools({mode:'undocked'});
+    } else {
+      mainWindow.webContents.closeDevTools();
+    }
   })
 };
 

@@ -37,6 +37,11 @@
   font-size: 1.2rem;
 }
 
+.btn-test:active,
+.btn-test:focus {
+  outline: none;
+}
+
 .url__input {
   margin-left: .5rem;
   padding: .2rem 1.5rem .2rem 1.5rem;
@@ -65,4 +70,24 @@ form {
   font-size: 1.1rem;
   color: crimson;
   margin-left: .5rem;
+}
+
+.dev__tools {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: left;
+  width: 10rem;
+  color: whitesmoke;
+  cursor: pointer;
+  margin-left: .5rem;
+  padding: 0 1.1rem 0 1.1rem;
+  background: mediumvioletred;
+  border: 2px solid mediumvioletred;
+  border-radius: 100vw;
+  font-size: 1rem;
+}
+
+.dev__tools:active, .dev__tools:focus {
+  outline: none;
 }

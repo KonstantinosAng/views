@@ -8,6 +8,7 @@ const mock_button = document.getElementById('mock');
 const form = document.getElementById('url_input_form');
 const input = document.getElementById('url_input');
 const message = document.getElementById('message');
+const devTools = document.getElementById('devTools');
 
 let mobileId = -1;
 let mainId = -1;
@@ -67,4 +68,8 @@ form.onsubmit = (event) => {
     }
     ipcRenderer.send('getUrl', url)
   }
+}
+
+devTools.onclick = (event) => {
+  ipcRenderer.send("devTools");
 }
