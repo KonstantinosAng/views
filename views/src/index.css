@@ -58,3 +58,11 @@ form {
 .url__input:active, .url__input:focus {
   outline: none;
 }
+
+.message {
+  display: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: crimson;
+  margin-left: .5rem;
+}

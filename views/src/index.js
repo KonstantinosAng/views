@@ -104,8 +104,8 @@ const createWindow = async () => {
   })
   
   ipcMain.on("getUrl", async (e, url) => {
-    await mobile_view.webContents.loadURL(url)
-    await main_view.webContents.loadURL(url)
+    await mobile_view.webContents.loadURL(url).then().catch(error=>console.log(""))
+    await main_view.webContents.loadURL(url).then().catch(error=>console.log(""))
   })
 
   /* Resize bounds */

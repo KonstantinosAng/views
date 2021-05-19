@@ -7,6 +7,7 @@ const main_forwardButton = document.getElementById("main_forward");
 const mock_button = document.getElementById('mock');
 const form = document.getElementById('url_input_form');
 const input = document.getElementById('url_input');
+const message = document.getElementById('message');
 
 let mobileId = -1;
 let mainId = -1;
@@ -47,6 +48,23 @@ main_forwardButton.onclick = () => {
 
 form.onsubmit = (event) => {
   event.preventDefault();
-  const url = input.value;
-  ipcRenderer.send('getUrl', url)
+  var url = input.value;
+  
+  var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+    '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+  
+  if (!pattern.test(url)) {    
+    message.style.display = 'flex';
+  } else {
+    message.style.display = 'none';
+    var protocol = /^((http|https|ftp):\/\/)/;
+    if (!protocol.test(url)) {
+      url = "https://www." + url;
+    }
+    ipcRenderer.send('getUrl', url)
+  }
 }
