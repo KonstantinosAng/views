@@ -20,7 +20,8 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "src/favicon.ico"
+        "icon": "src/favicon.ico",
+        "name": "WebViews"
       },
       "makers": [
         {
