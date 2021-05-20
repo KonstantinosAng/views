@@ -14,6 +14,8 @@ const createWindow = async () => {
   const mainWindow = new BrowserWindow({
     width: screenDimensions.size.width,
     height: screenDimensions.size.height,
+    // frame: false,
+    // transparent: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -52,11 +54,11 @@ const createWindow = async () => {
     height: mainWindow.getBounds().height - 40 - space
   })
   await mobile_view.webContents.loadURL('https://github.com')
-  mobile_view.setAutoResize({width: true});
+  mobile_view.setAutoResize({width: true, height: true});
   /* Handle mobile view forward backward */
   mainWindow.webContents.send("mobileId", mobile_view.webContents.id);
   mobile_view.webContents.on("did-navigate", () => {
-    mainWindow.webContents.send("mobile_canNav", mobile_view.webContents.canGoBack(), mobile_view.webContents.canGoForward());
+    mainWindow.webContents.send("mobile_canNav", mobile_view.webContents.canGoBack(), mobile_view.webContents.canGoForward(), mobile_view.webContents.getURL());
   });
   ipcMain.on("mobile_goBack", (e, webContentsId) => {
     const wc = webContents.fromId(mobile_view.webContents.id);
@@ -80,13 +82,12 @@ const createWindow = async () => {
     height: mainWindow.getBounds().height - 40 - space
   })
   await main_view.webContents.loadURL('https://github.com')
-  main_view.setAutoResize({width: true});
+  main_view.setAutoResize({width: true, height: true});
   /* Handle main view forward backward */
   mainWindow.webContents.send("mainId", main_view.webContents.id);
   main_view.webContents.on("did-navigate", () => {
-    mainWindow.webContents.send("main_canNav", main_view.webContents.canGoBack(), main_view.webContents.canGoForward());
+    mainWindow.webContents.send("main_canNav", main_view.webContents.canGoBack(), main_view.webContents.canGoForward(), main_view.webContents.getURL());
   });
-
   ipcMain.on("main_goBack", (e, webContentsId) => {
     const wc = webContents.fromId(main_view.webContents.id);
     if (wc && wc.canGoBack()) {
@@ -122,6 +123,7 @@ const createWindow = async () => {
       width: Number.parseInt(newBounds.width - newBounds.width / 4),
       height: newBounds.height - 40 - space
     })
+    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
   mainWindow.on('enter-full-screen', () => {

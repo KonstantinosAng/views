@@ -23,14 +23,16 @@ ipcRenderer.on('mainId', (event, _id) => {
   mainId = _id;
 })
 
-ipcRenderer.on('mobile_canNav', (event, canBack, canForward) => {
+ipcRenderer.on('mobile_canNav', (event, canBack, canForward, url) => {
   mobile_backButton.disabled = !canBack;
   mobile_forwardButton.disabled = !canForward;
+  input.value = url;
 })
 
-ipcRenderer.on('main_canNav', (event, canBack, canForward) => {
+ipcRenderer.on('main_canNav', (event, canBack, canForward, url) => {
   main_backButton.disabled = !canBack;
   main_forwardButton.disabled = !canForward;
+  input.value = url;
 })
 
 mobile_backButton.onclick = () => {
@@ -98,6 +100,6 @@ document.addEventListener('mousemove', (e) => {
   }
 });
 
-// ipcRenderer.on('resize_maximize', (e, x) => {
-//   resize.style.left = (x - 13) + 'px';
-// }
+ipcRenderer.on('resize_maximize', (e, x) => {
+  resize.style.left = (x - 13) + 'px';
+})

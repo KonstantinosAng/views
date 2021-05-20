@@ -9,7 +9,7 @@
   position: sticky;
   justify-content: space-evenly;
   z-index: 100;
-  background-color: rgb(13, 17, 23);
+  background-color: #0d1117;
 }
 
 .mobile__view {
