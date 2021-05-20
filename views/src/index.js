@@ -13,10 +13,12 @@ const createWindow = async () => {
   const spaceBottomResize = 0;
   const rightSize = 15;
   const screenDimensions = electron.screen.getPrimaryDisplay();
+  var disableRightClick = false;
   /* Main Window */
   const mainWindow = new BrowserWindow({
     width: screenDimensions.size.width,
     height: screenDimensions.size.height,
+    minWidth: Number.parseInt(1.9 * screenDimensions.bounds.width / 3),
     frame: false,
     titleBarStyle: 'hidden',
     webPreferences: {
@@ -25,7 +27,7 @@ const createWindow = async () => {
       enableRemoteModule: true,
     }
   });
-  
+
   const mobile_view = new BrowserView({
     webPreferences: {
       nodeIntegration: false,
@@ -99,11 +101,13 @@ const createWindow = async () => {
   })
   await main_view.webContents.loadURL('https://github.com')
   main_view.setAutoResize({width: true, height: true});
+  
   /* Handle main view forward backward */
   mainWindow.webContents.send("mainId", main_view.webContents.id);
   main_view.webContents.on("did-navigate", () => {
     mainWindow.webContents.send("main_canNav", main_view.webContents.canGoBack(), main_view.webContents.canGoForward(), main_view.webContents.getURL());
   });
+
   ipcMain.on("main_goBack", (e, webContentsId) => {
     const wc = webContents.fromId(main_view.webContents.id);
     if (wc && wc.canGoBack()) {
@@ -118,6 +122,7 @@ const createWindow = async () => {
     }
   })
   
+  /* Update URL */
   ipcMain.on("getUrl", async (e, url) => {
     await mobile_view.webContents.loadURL(url).then().catch(error=>console.log(""))
     await main_view.webContents.loadURL(url).then().catch(error=>console.log(""))
@@ -125,7 +130,7 @@ const createWindow = async () => {
   
   /* Update Size info */
   sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4 - rightSize), mainWindow.getBounds().height + spaceBottom - space)
-  
+
   /* Resize bounds */
   mainWindow.on('will-resize', (_event, newBounds) => {
     newBounds = screen.screenToDipRect(mainWindow, newBounds);
@@ -188,6 +193,29 @@ const createWindow = async () => {
       mobile_view.webContents.openDevTools({mode: 'undocked'});
     } else {
       mobile_view.webContents.closeDevTools();
+    }
+  })
+
+  /* Ispect Elements */
+  ipcMain.on('listenRightClick', (e, toggle) => {
+    disableRightClick = toggle;
+  })
+
+  mobile_view.webContents.addListener('context-menu', (e, event) => {
+    if (!disableRightClick) {
+      if (!mobile_view.webContents.isDevToolsOpened()) {
+        mobile_view.webContents.openDevTools({mode:'undocked'});
+      }
+      mobile_view.webContents.inspectElement(event.x, event.y);
+    }
+  })
+
+  main_view.webContents.addListener('context-menu', (e, event) => {
+    if (!disableRightClick) {
+      if (!main_view.webContents.isDevToolsOpened()) {
+        main_view.webContents.openDevTools({mode: 'undocked'});
+      }
+      main_view.webContents.inspectElement(event.x, event.y);
     }
   })
 };

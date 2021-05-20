@@ -13,7 +13,7 @@ const mobileDevTools = document.getElementById('mobileDevTools');
 const resize = document.getElementById('resize');
 const main_view = document.getElementById('main_view_block');
 const widthInfo = document.getElementById('widthInfo');
-
+const rightClickButton = document.getElementById('buttonRightClick');
 let mobileId = -1;
 let mainId = -1;
 
@@ -156,3 +156,16 @@ ipcRenderer.on('widthInfo', (e, mobileWidth, mobileHeight, mainWidth, mainHeight
   widthInfo.innerText = mobileWidth + 'x' + mobileHeight + ' || ' + mainWidth + 'x' + mainHeight;
 })
 
+var toggle = false;
+rightClickButton.addEventListener('click', (e) => {
+  e.preventDefault();
+  toggle = !toggle;
+  ipcRenderer.send('listenRightClick', toggle);
+  if (toggle) {
+    rightClickButton.style.background = '#238D3D';
+    rightClickButton.style.border = '2px solid #238D3D';
+  } else {
+    rightClickButton.style.background = 'crimson';
+    rightClickButton.style.border = '2px solid crimson';
+  }
+})
