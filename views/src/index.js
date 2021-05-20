@@ -23,7 +23,6 @@ const createWindow = async () => {
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,
-      preload: path.join(__dirname, 'preload.js'),
     }
   });
   
@@ -162,6 +161,16 @@ const createWindow = async () => {
       mainWindow.webContents.closeDevTools();
     }
   })
+
+  ipcMain.addListener('oncontextmenu', (event, e) => {
+    event.returnValue = null;
+    console.log('clicked')
+    if (!mainWindow.webContents.isDevToolsOpened()) {
+      // Open the DevTools.
+      mainWindow.webContents.openDevTools({mode:'undocked'});
+    }
+    window.webContents.inspectElement(e.x, e.y);
+  });
 };
 
 const resizeWindow = (view, x, y, width, height) => {

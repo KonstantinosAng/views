@@ -125,3 +125,27 @@ document.addEventListener('mousemove', (e) => {
 ipcRenderer.on('resize_maximize', (e, x) => {
   resize.style.left = (x - 13) + 'px';
 })
+
+var mouseEnter = false;
+input.addEventListener('mouseenter', () => {
+  mouseEnter = true;
+  mouseLeft = false;
+})
+
+input.addEventListener('click', () => {
+  if (mouseEnter && !mouseLeft) {
+    input.focus();
+    input.select();
+    mouseLeft = true;
+  }
+})
+
+var mouseLeft = false;
+input.addEventListener('mouseleave', () => {
+  mouseLeft = true;
+  mouseEnter = false;
+})
+
+input.addEventListener('selectstart', (e) => {
+  console.log(e.clientX)
+})
