@@ -12,6 +12,7 @@ const mainDevTools = document.getElementById('mainDevTools');
 const mobileDevTools = document.getElementById('mobileDevTools');
 const resize = document.getElementById('resize');
 const main_view = document.getElementById('main_view_block');
+const widthInfo = document.getElementById('widthInfo');
 
 let mobileId = -1;
 let mainId = -1;
@@ -151,6 +152,7 @@ input.addEventListener('mouseleave', () => {
   mouseEnter = false;
 })
 
-document.addEventListener('contextmenu', (e) => {
-  ipcRenderer.send('rightClicked', e.clientX, e.clientY)
+ipcRenderer.on('widthInfo', (e, mobileWidth, mobileHeight, mainWidth, mainHeight) => {
+  widthInfo.innerText = mobileWidth + 'x' + mobileHeight + ' || ' + mainWidth + 'x' + mainHeight;
 })
+

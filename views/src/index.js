@@ -40,6 +40,19 @@ const createWindow = async () => {
     }
   })
 
+  const resizeWindow = (view, x, y, width, height) => {
+    view.setBounds({
+      x: x,
+      y: y,
+      width: width,
+      height: height
+    })
+  }
+
+  const sendInfo = (mobileWidth, mobileHeight, mainWidth, mainHeight) => {
+    mainWindow.webContents.send('widthInfo', mobileWidth, mobileHeight, mainWidth, mainHeight);
+  }
+
   mainWindow.removeMenu();
   mainWindow.setMenu(null);
   // and load the index.html of the app.
@@ -109,45 +122,55 @@ const createWindow = async () => {
     await mobile_view.webContents.loadURL(url).then().catch(error=>console.log(""))
     await main_view.webContents.loadURL(url).then().catch(error=>console.log(""))
   })
-
+  
+  /* Update Size info */
+  sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4 - rightSize), mainWindow.getBounds().height + spaceBottom - space)
+  
   /* Resize bounds */
   mainWindow.on('will-resize', (_event, newBounds) => {
     newBounds = screen.screenToDipRect(mainWindow, newBounds);
     resizeWindow(mobile_view, 0, space, Number.parseInt(newBounds.width / 4), newBounds.height + spaceBottomResize - space);
     resizeWindow(main_view, Number.parseInt(newBounds.width / 4), space, Number.parseInt(newBounds.width - newBounds.width / 4), newBounds.height + spaceBottomResize - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(newBounds.width / 4));
+    sendInfo(Number.parseInt(newBounds.width / 4), newBounds.height + spaceBottomResize - space, Number.parseInt(newBounds.width - newBounds.width / 4), newBounds.height + spaceBottomResize - space)
   })
 
   mainWindow.on('enter-full-screen', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4 - rightSize), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+    sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space)
   })
 
   mainWindow.on('leave-full-screen', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
     resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+    sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space)
   })
 
   mainWindow.on('maximize', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4 - rightSize), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+    sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
   })
 
   mainWindow.on('unmaximize', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
     resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+    sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space)
   })
 
   ipcMain.on("resize_drag", (e, x) => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space);
     if (mainWindow.webContents.isMaximize) {
       resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x - rightSize), mainWindow.getBounds().height + spaceBottomResize - space);
+      sendInfo(Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - x - rightSize), mainWindow.getBounds().height + spaceBottomResize - space)
     } else {
       resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x), mainWindow.getBounds().height + spaceBottomResize - space);
+      sendInfo(Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - x), mainWindow.getBounds().height + spaceBottomResize - space)
     }
   })
 
@@ -168,15 +191,6 @@ const createWindow = async () => {
     }
   })
 };
-
-const resizeWindow = (view, x, y, width, height) => {
-  view.setBounds({
-    x: x,
-    y: y,
-    width: width,
-    height: height
-  })
-}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

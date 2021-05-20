@@ -126,3 +126,12 @@ form {
 .menubar-menu-button {
   display: none;
 }
+
+.info__tag {
+  color: whitesmoke;
+  font-size: 1.1rem;
+  margin-left: .5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
