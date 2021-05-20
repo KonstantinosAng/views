@@ -20,6 +20,7 @@ const createWindow = async () => {
     height: screenDimensions.size.height,
     minWidth: Number.parseInt(1.9 * screenDimensions.bounds.width / 3),
     frame: false,
+    icon: path.join(__dirname, 'logo.png'),
     titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
@@ -59,10 +60,12 @@ const createWindow = async () => {
   mainWindow.setMenu(null);
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  mainWindow.setIcon(path.join(__dirname, 'favicon.png'));
-  mainWindow.setOverlayIcon(path.join(__dirname, 'favicon.ico'), 'WebViews');
+  mainWindow.setIcon(path.join(__dirname, 'logo.png'));
+  mainWindow.setOverlayIcon(path.join(__dirname, 'logo.png'), 'WebViews');
   mainWindow.setFullScreen(false);
   mainWindow.maximize();
+  mainWindow.once('focus', ()=> mainWindow.flashFrame(false))
+  mainWindow.flashFrame(true);
 
   /* Mobile View */
   mainWindow.addBrowserView(mobile_view)
@@ -225,6 +228,14 @@ const createWindow = async () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
+app.setUserTasks([{
+  program: process.execPath,
+  arguments: '--new-window',
+  iconPath: process.execPath,
+  iconIndex: 0,
+  title: 'New WebView Window',
+  description: 'Create a new WebView Window'
+}])
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
