@@ -11,6 +11,7 @@ const createWindow = async () => {
   const space = 60;
   const spaceBottom = -15;
   const spaceBottomResize = 0;
+  const rightSize = 15;
   const screenDimensions = electron.screen.getPrimaryDisplay();
   /* Main Window */
   const mainWindow = new BrowserWindow({
@@ -81,7 +82,7 @@ const createWindow = async () => {
   main_view.setBounds({
     x: Number.parseInt(mainWindow.getBounds().width / 4),
     y: space,
-    width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
+    width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4 - rightSize),
     height: mainWindow.getBounds().height + spaceBottom - space
   })
   await main_view.webContents.loadURL('https://github.com')
@@ -120,7 +121,7 @@ const createWindow = async () => {
 
   mainWindow.on('enter-full-screen', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
-    resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
+    resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4 - rightSize), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
@@ -132,7 +133,7 @@ const createWindow = async () => {
 
   mainWindow.on('maximize', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
-    resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
+    resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4 - rightSize), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
@@ -144,7 +145,11 @@ const createWindow = async () => {
 
   ipcMain.on("resize_drag", (e, x) => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space);
-    resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x), mainWindow.getBounds().height + spaceBottomResize - space);
+    if (mainWindow.webContents.isMaximize) {
+      resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x - rightSize), mainWindow.getBounds().height + spaceBottomResize - space);
+    } else {
+      resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x), mainWindow.getBounds().height + spaceBottomResize - space);
+    }
   })
 
   /* Dev Tools toggle */

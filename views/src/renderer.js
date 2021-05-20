@@ -55,6 +55,29 @@ form.onsubmit = (event) => {
   event.preventDefault();
   var url = input.value;
   
+  split = url.split(":")
+  if (split.length === 3) {
+    if (split[1] == '//localhost') {
+      message.style.display = 'none';
+      ipcRenderer.send('getUrl', "http://www." + url)
+      return
+    }
+  } else if (split.length === 2) {
+    if (split[0] == 'localhost') {
+      message.style.display = 'none';
+      ipcRenderer.send('getUrl', "http://www." + url)
+      return
+    }
+  } else if (split.length === 1) {
+    if (split[0] == 'localhost') {
+      message.style.display = 'none';
+      ipcRenderer.send('getUrl', "http://www." + url)
+      return
+    }
+  } else {
+    message.style.display = 'flex';
+  }
+
   var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
     '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
