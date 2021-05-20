@@ -74,7 +74,7 @@ form {
   margin-left: .5rem;
 }
 
-.dev__tools {
+.mainDev__tools {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -90,7 +90,26 @@ form {
   font-size: 1rem;
 }
 
-.dev__tools:active, .dev__tools:focus {
+.mobileDev__tools {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: left;
+  width: 6.4rem;
+  color: whitesmoke;
+  cursor: pointer;
+  margin-left: .5rem;
+  padding: 0 1.1rem 0 1.1rem;
+  background: crimson;
+  border: 2px solid crimson;
+  border-radius: 100vw;
+  font-size: .9rem;
+}
+
+.mobileDev__tools:active,
+.mobileDev__tools:focus,
+.mainDev__tools:active,
+.mainDev__tools:focus {
   outline: none;
 }
 

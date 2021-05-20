@@ -152,25 +152,21 @@ const createWindow = async () => {
   })
 
   /* Dev Tools toggle */
-  ipcMain.on("devTools", (e) => {
-    mainWindow.webContents.isDevToolsOpened()
-    if (!mainWindow.webContents.isDevToolsOpened()) {
-      // Open the DevTools.
-      mainWindow.webContents.openDevTools({mode:'undocked'});
+  ipcMain.on("mainDevTools", (e) => {
+    if (!main_view.webContents.isDevToolsOpened()) {
+      main_view.webContents.openDevTools({mode:'undocked'});
     } else {
-      mainWindow.webContents.closeDevTools();
+      main_view.webContents.closeDevTools();
     }
   })
 
-  ipcMain.addListener('oncontextmenu', (event, e) => {
-    event.returnValue = null;
-    console.log('clicked')
-    if (!mainWindow.webContents.isDevToolsOpened()) {
-      // Open the DevTools.
-      mainWindow.webContents.openDevTools({mode:'undocked'});
+  ipcMain.on("mobileDevTools", (e) => {
+    if (!mobile_view.webContents.isDevToolsOpened()) {
+      mobile_view.webContents.openDevTools({mode: 'undocked'});
+    } else {
+      mobile_view.webContents.closeDevTools();
     }
-    window.webContents.inspectElement(e.x, e.y);
-  });
+  })
 };
 
 const resizeWindow = (view, x, y, width, height) => {

@@ -8,7 +8,8 @@ const mock_button = document.getElementById('mock');
 const form = document.getElementById('url_input_form');
 const input = document.getElementById('url_input');
 const message = document.getElementById('message');
-const devTools = document.getElementById('devTools');
+const mainDevTools = document.getElementById('mainDevTools');
+const mobileDevTools = document.getElementById('mobileDevTools');
 const resize = document.getElementById('resize');
 const main_view = document.getElementById('main_view_block');
 
@@ -97,8 +98,12 @@ form.onsubmit = (event) => {
   }
 }
 
-devTools.onclick = (event) => {
-  ipcRenderer.send("devTools");
+mainDevTools.onclick = (event) => {
+  ipcRenderer.send("mainDevTools");
+}
+
+mobileDevTools.onclick = (event) => {
+  ipcRenderer.send("mobileDevTools");
 }
 
 var x = 0;
@@ -115,7 +120,7 @@ document.addEventListener('mouseup', () => {
 
 document.addEventListener('mousemove', (e) => {
   e.preventDefault();
-  if (isDown && e.clientX + x - 13 < 568 && e.clientX + x - 13 > 146) {
+  if (isDown && e.clientX + x - 13 < 568 && e.clientX + x - 13 > 245) {
     resize.style.left = (e.clientX + x -13) + 'px';
     ipcRenderer.send('resize_drag', e.clientX + x);
     main_view.style.flex = 1 - (e.clientX + x) / window.innerWidth;
@@ -146,6 +151,6 @@ input.addEventListener('mouseleave', () => {
   mouseEnter = false;
 })
 
-input.addEventListener('selectstart', (e) => {
-  console.log(e.clientX)
+document.addEventListener('contextmenu', (e) => {
+  ipcRenderer.send('rightClicked', e.clientX, e.clientY)
 })
