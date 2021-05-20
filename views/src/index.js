@@ -60,6 +60,7 @@ const createWindow = async () => {
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
   mainWindow.setIcon(path.join(__dirname, 'favicon.png'));
+  mainWindow.setOverlayIcon(path.join(__dirname, 'favicon.ico'), 'WebViews');
   mainWindow.setFullScreen(false);
   mainWindow.maximize();
 
