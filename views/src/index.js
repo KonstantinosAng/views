@@ -8,18 +8,21 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 const createWindow = async () => {
-  const space = 30;
+  const space = 60;
+  const spaceBottom = -15;
+  const spaceBottomResize = 0;
   const screenDimensions = electron.screen.getPrimaryDisplay();
   /* Main Window */
   const mainWindow = new BrowserWindow({
     width: screenDimensions.size.width,
     height: screenDimensions.size.height,
-    // frame: false,
-    // transparent: true,
+    frame: false,
+    titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,
+      preload: path.join(__dirname, 'preload.js'),
     }
   });
   
@@ -51,7 +54,7 @@ const createWindow = async () => {
     x: 0,
     y: space,
     width: Number.parseInt(mainWindow.getBounds().width / 4),
-    height: mainWindow.getBounds().height - 40 - space
+    height: mainWindow.getBounds().height + spaceBottom - space
   })
   await mobile_view.webContents.loadURL('https://github.com')
   mobile_view.setAutoResize({width: true, height: true});
@@ -79,7 +82,7 @@ const createWindow = async () => {
     x: Number.parseInt(mainWindow.getBounds().width / 4),
     y: space,
     width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
-    height: mainWindow.getBounds().height - 40 - space
+    height: mainWindow.getBounds().height + spaceBottom - space
   })
   await main_view.webContents.loadURL('https://github.com')
   main_view.setAutoResize({width: true, height: true});
@@ -108,101 +111,40 @@ const createWindow = async () => {
   })
 
   /* Resize bounds */
-  mainWindow.on('will-resize', (_event, newBounds) => {    
+  mainWindow.on('will-resize', (_event, newBounds) => {
     newBounds = screen.screenToDipRect(mainWindow, newBounds);
-    mobile_view.setBounds({
-      x: 0,
-      y: space,
-      width: Number.parseInt(newBounds.width / 4),
-      height: newBounds.height - 40 - space
-    })
-
-    main_view.setBounds({
-      x: Number.parseInt(newBounds.width / 4),
-      y: space,
-      width: Number.parseInt(newBounds.width - newBounds.width / 4),
-      height: newBounds.height - 40 - space
-    })
-    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+    resizeWindow(mobile_view, 0, space, Number.parseInt(newBounds.width / 4), newBounds.height + spaceBottomResize - space);
+    resizeWindow(main_view, Number.parseInt(newBounds.width / 4), space, Number.parseInt(newBounds.width - newBounds.width / 4), newBounds.height + spaceBottomResize - space);
+    mainWindow.webContents.send("resize_maximize", Number.parseInt(newBounds.width / 4));
   })
 
   mainWindow.on('enter-full-screen', () => {
-    mobile_view.setBounds({
-      x: 0,
-      y: space,
-      width: Number.parseInt(mainWindow.getBounds().width / 4),
-      height: mainWindow.getBounds().height - 40 - space
-    })
-    main_view.setBounds({
-      x: Number.parseInt(mainWindow.getBounds().width / 4),
-      y: space,
-      width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
-      height: mainWindow.getBounds().height - 40 - space
-    })
+    resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
+    resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
   mainWindow.on('leave-full-screen', () => {
-    mobile_view.setBounds({
-      x: 0,
-      y: space,
-      width: Number.parseInt(mainWindow.getBounds().width / 4),
-      height: mainWindow.getBounds().height - 40 - space
-    })
-    main_view.setBounds({
-      x: Number.parseInt(mainWindow.getBounds().width / 4),
-      y: space,
-      width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
-      height: mainWindow.getBounds().height - 40 - space
-    })
+    resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
+    resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
   mainWindow.on('maximize', () => {
-    mobile_view.setBounds({
-      x: 0,
-      y: space,
-      width: Number.parseInt(mainWindow.getBounds().width / 4),
-      height: mainWindow.getBounds().height - 40 - space
-    })
-    main_view.setBounds({
-      x: Number.parseInt(mainWindow.getBounds().width / 4),
-      y: space,
-      width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
-      height: mainWindow.getBounds().height - 40 - space
-    })
+    resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
+    resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
   mainWindow.on('unmaximize', () => {
-    mobile_view.setBounds({
-      x: 0,
-      y: space,
-      width: Number.parseInt(mainWindow.getBounds().width / 4),
-      height: mainWindow.getBounds().height - 40 - space
-    })
-    main_view.setBounds({
-      x: Number.parseInt(mainWindow.getBounds().width / 4),
-      y: space,
-      width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4),
-      height: mainWindow.getBounds().height - 40 - space
-    })
+    resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
+    resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
     mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
   })
 
   ipcMain.on("resize_drag", (e, x) => {
-    mobile_view.setBounds({
-      x: 0,
-      y: space,
-      width: Number.parseInt(x),
-      height: mainWindow.getBounds().height - 40 - space
-    })
-    main_view.setBounds({
-      x: Number.parseInt(x),
-      y: space,
-      width: Number.parseInt(mainWindow.getBounds().width - x),
-      height: mainWindow.getBounds().height - 40 - space
-    })
+    resizeWindow(mobile_view, 0, space, Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space);
+    resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x), mainWindow.getBounds().height + spaceBottomResize - space);
   })
 
   /* Dev Tools toggle */
@@ -216,6 +158,15 @@ const createWindow = async () => {
     }
   })
 };
+
+const resizeWindow = (view, x, y, width, height) => {
+  view.setBounds({
+    x: x,
+    y: y,
+    width: width,
+    height: height
+  })
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

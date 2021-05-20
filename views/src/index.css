@@ -82,8 +82,8 @@ form {
   cursor: pointer;
   margin-left: .5rem;
   padding: 0 1.1rem 0 1.1rem;
-  background: mediumvioletred;
-  border: 2px solid mediumvioletred;
+  background: crimson;
+  border: 2px solid crimson;
   border-radius: 100vw;
   font-size: 1rem;
 }
@@ -96,8 +96,12 @@ form {
   position: absolute;
   top: 0;
   left: 24.5%;
-  color: deeppink;
+  color: crimson;
   font-weight: bold;
   font-size: 1.5rem;
   cursor: col-resize;
+}
+
+.menubar-menu-button {
+  display: none;
 }

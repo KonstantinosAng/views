@@ -96,7 +96,6 @@ document.addEventListener('mousemove', (e) => {
     resize.style.left = (e.clientX + x -13) + 'px';
     ipcRenderer.send('resize_drag', e.clientX + x);
     main_view.style.flex = 1 - (e.clientX + x) / window.innerWidth;
-    console.log(e.clientX + x - 13)
   }
 });
 
