@@ -151,7 +151,7 @@ document.addEventListener('mouseup', (e) => {
 });
 
 document.addEventListener('mousemove', (e) => {
-  // e.preventDefault();
+  e.preventDefault();
   event.stopPropagation();
   if (isDown && e.clientX + x - 13 <= 450 && e.clientX + x - 13 >= 235) {
     resize.style.left = (e.clientX + x -13) + 'px';
@@ -160,6 +160,8 @@ document.addEventListener('mousemove', (e) => {
     mobile_view.style.flex = (e.clientX + x) / window.innerWidth;
   }
   if (isClicked) {
+    // slider.value += ( e.clientX - pos ) / 10;
+    // console.log(slider.value)
     if (e.clientX - pos > 0) {
       slider.value += 0.01;
     }
