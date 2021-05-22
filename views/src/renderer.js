@@ -142,10 +142,12 @@ resize.addEventListener('mouseup', () => {
 
 document.addEventListener('mouseup', (e) => {
   isDown = false;
-  isClicked = false;
   caughtValue = false;
+  if (isClicked) {
+    ipcRenderer.send("zoom", Number.parseFloat(slider.value));
+  }
   pos = e.clientX;
-  ipcRenderer.send("zoom", Number.parseFloat(slider.value))
+  isClicked = false;
 });
 
 document.addEventListener('mousemove', (e) => {

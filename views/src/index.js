@@ -66,7 +66,7 @@ const createWindow = async () => {
   mainWindow.once('focus', ()=> mainWindow.flashFrame(false))
   mainWindow.flashFrame(true);
   mainWindow.webContents.setZoomLevel(0)
-  mainWindow.webContents.openDevTools({mode: 'undocked'});
+  // mainWindow.webContents.openDevTools({mode: 'undocked'});
 
   /* Mobile View */
   mainWindow.addBrowserView(mobile_view)
