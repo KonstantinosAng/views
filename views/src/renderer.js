@@ -14,8 +14,6 @@ const mobile_view = document.getElementById('mobile_view_block');
 const widthInfo = document.getElementById('widthInfo');
 const rightClickButton = document.getElementById('buttonRightClick');
 const refresh = document.getElementById('refresh_button');
-const zoomIn = document.getElementById('zoomIn');
-const zoomOut = document.getElementById('zoomOut');
 const slider = document.getElementById('slider');
 let mobileId = -1;
 let mainId = -1;
@@ -114,26 +112,61 @@ mobileDevTools.onclick = (event) => {
   ipcRenderer.send("mobileDevTools");
 }
 
-/* Resize bar */
+/* Resize bar && Zoom */
 var x = 0;
 var isDown = false;
+var isClicked = false;
+var pos = 0;
+var caughtValue = false
+
+slider.addEventListener('mousedown', (e) => {
+  isClicked = true;
+  if (!caughtValue) {
+    pos = e.clientX;
+    caughtValue = true
+  }
+});
 
 resize.addEventListener('mousedown', (e) => {
-  isDown = true;
+  if (isDown) { 
+    isDown = false
+  } else {
+    isDown = true;
+  }
   x = resize.offsetLeft - e.clientX;
 });
 
-document.addEventListener('mouseup', () => {
+resize.addEventListener('mouseup', () => {
   isDown = false;
+})
+
+document.addEventListener('mouseup', (e) => {
+  isDown = false;
+  isClicked = false;
+  caughtValue = false;
+  pos = e.clientX;
+  ipcRenderer.send("zoom", Number.parseFloat(slider.value))
 });
 
 document.addEventListener('mousemove', (e) => {
-  e.preventDefault();
+  // e.preventDefault();
+  event.stopPropagation();
   if (isDown && e.clientX + x - 13 <= 450 && e.clientX + x - 13 >= 235) {
     resize.style.left = (e.clientX + x -13) + 'px';
     ipcRenderer.send('resize_drag', e.clientX + x);
     main_view.style.flex = 1 -  (e.clientX + x) / window.innerWidth;
     mobile_view.style.flex = (e.clientX + x) / window.innerWidth;
+  }
+  if (isClicked) {
+    if (e.clientX - pos > 0) {
+      slider.value += 0.01;
+    }
+    if (e.clientX - pos < 0) {
+      slider.value -= 0.01;
+    }
+    if (e.clientX - pos === 0) {
+      slider.value = slider.value;
+    }
   }
 });
 
@@ -193,9 +226,3 @@ rightClickButton.addEventListener('click', (e) => {
 refresh.addEventListener('click', (e) => {
   ipcRenderer.send('refresh');
 })
-
-/* Zoom */
-slider.oninput = () => {
-  console.log(slider.value);
-  ipcRenderer.send('zoom', Number.parseFloat(slider.value))
-}

@@ -17,6 +17,7 @@
   justify-content: space-evenly;
   z-index: 100;
   background-color: #0d1117;
+  user-select: none;
 }
 
 .mobile__view {
@@ -51,6 +52,12 @@
   outline: none;
 }
 
+form {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+}
+
 .url__input {
   margin-left: .4rem;
   padding: .2rem 1.5rem .2rem 1.5rem;
@@ -63,10 +70,9 @@
   user-select: text;
 }
 
-form {
-  display: flex;
-  align-items: center;
-  justify-content: right;
+.url__input[type="text"] {
+  color: black;
+  font-weight: bold;
 }
 
 .url__input:active, .url__input:focus {
@@ -130,6 +136,7 @@ form {
   font-weight: bold;
   font-size: 1.5rem;
   cursor: col-resize;
+  user-select: none;
 }
 
 .menubar-menu-button {
@@ -168,42 +175,6 @@ form {
   padding: 0 .2rem 0 .4rem;
   cursor: pointer;
   filter: invert(100%);
-}
-
-.plus, .minus {
-  display: flex;
-  justify-content:center;
-  align-items: center;
-  text-align: center;
-  color: whitesmoke;
-  margin: 0 .25rem 0 .25rem;
-  padding: .2rem .25rem .2rem .25rem;
-  font-weight: bold;
-  font-size: 1.15rem;
-  cursor: pointer;
-}
-
-.plus {
-  background: var(--zoom-color);
-  border-radius: 100vw;
-}
-
-.minus {
-  background: var(--zoom-color);
-  border-radius: 100vw;
-}
-
-.zoom_in, .zoom_out {
-  object-fit: contain;
-  display:flex;
-  justify-content:center;
-  align-items: center;
-  width: 1rem;
-}
-
-.zoom_out {
-  -webkit-transform: scaleX(-1);
-  transform: scaleX(-1);
 }
 
 .slidecontainer {
