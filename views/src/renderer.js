@@ -12,11 +12,15 @@ const mainDevTools = document.getElementById('mainDevTools');
 const mobileDevTools = document.getElementById('mobileDevTools');
 const resize = document.getElementById('resize');
 const main_view = document.getElementById('main_view_block');
+const mobile_view = document.getElementById('mobile_view_block');
 const widthInfo = document.getElementById('widthInfo');
 const rightClickButton = document.getElementById('buttonRightClick');
+const refresh = document.getElementById('refresh_button');
 let mobileId = -1;
 let mainId = -1;
 
+
+/* Handle go forth and back */
 ipcRenderer.on('mobileId', (event, _id) => {
   mobileId = _id;
 })
@@ -53,6 +57,7 @@ main_forwardButton.onclick = () => {
   ipcRenderer.send('main_goForward', mainId);
 }
 
+/* Handle url input */
 form.onsubmit = (event) => {
   event.preventDefault();
   var url = input.value;
@@ -99,6 +104,7 @@ form.onsubmit = (event) => {
   }
 }
 
+/* Dev tools */
 mainDevTools.onclick = (event) => {
   ipcRenderer.send("mainDevTools");
 }
@@ -107,6 +113,7 @@ mobileDevTools.onclick = (event) => {
   ipcRenderer.send("mobileDevTools");
 }
 
+/* Resize bar */
 var x = 0;
 var isDown = false;
 
@@ -121,16 +128,25 @@ document.addEventListener('mouseup', () => {
 
 document.addEventListener('mousemove', (e) => {
   e.preventDefault();
-  if (isDown && e.clientX + x - 13 < 568 && e.clientX + x - 13 > 255) {
+  if (isDown && e.clientX + x - 13 <= 450 && e.clientX + x - 13 >= 255) {
     resize.style.left = (e.clientX + x -13) + 'px';
     ipcRenderer.send('resize_drag', e.clientX + x);
-    main_view.style.flex = 1 - (e.clientX + x) / window.innerWidth;
+    main_view.style.flex = 1 -  (e.clientX + x) / window.innerWidth;
+    mobile_view.style.flex = (e.clientX + x) / window.innerWidth;
   }
 });
 
 ipcRenderer.on('resize_maximize', (e, x) => {
   resize.style.left = (x - 13) + 'px';
+  main_view.style.flex = 1 -  x / window.innerWidth;
+  mobile_view.style.flex = x / window.innerWidth;
 })
+
+/* Resize on creation */
+main_view.style.flex = 1 - (resize.offsetLeft + 13) / window.innerWidth;
+mobile_view.style.flex = (resize.offsetLeft + 13) / window.innerWidth;
+
+/* Input select */
 
 var mouseEnter = false;
 input.addEventListener('mouseenter', () => {
@@ -152,6 +168,7 @@ input.addEventListener('mouseleave', () => {
   mouseEnter = false;
 })
 
+/* Width info update */
 ipcRenderer.on('widthInfo', (e, mobileWidth, mobileHeight, mainWidth, mainHeight) => {
   widthInfo.innerText = mobileWidth + 'x' + mobileHeight + ' || ' + mainWidth + 'x' + mainHeight;
 })
@@ -169,3 +186,11 @@ rightClickButton.addEventListener('click', (e) => {
     rightClickButton.style.border = '2px solid crimson';
   }
 })
+
+/* Refresh */
+refresh.addEventListener('click', (e) => {
+  ipcRenderer.send('refresh');
+})
+
+/* Zoom */
+var zoomLevel = 0;

@@ -14,13 +14,14 @@ const createWindow = async () => {
   const rightSize = 15;
   const screenDimensions = electron.screen.getPrimaryDisplay();
   var disableRightClick = false;
+  var zoomLevel = 0;
   /* Main Window */
   const mainWindow = new BrowserWindow({
     width: screenDimensions.size.width,
     height: screenDimensions.size.height,
-    minWidth: Number.parseInt(1.9 * screenDimensions.bounds.width / 3),
+    minWidth: Number.parseInt(2.05 * screenDimensions.bounds.width / 3),
     frame: false,
-    icon: path.join(__dirname, 'logo.png'),
+    icon: path.join(__dirname, 'img/logo.png'),
     titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
@@ -60,12 +61,13 @@ const createWindow = async () => {
   mainWindow.setMenu(null);
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  mainWindow.setIcon(path.join(__dirname, 'logo.png'));
-  mainWindow.setOverlayIcon(path.join(__dirname, 'logo.png'), 'WebViews');
+  mainWindow.setIcon(path.join(__dirname, 'img/logo.png'));
+  mainWindow.setOverlayIcon(path.join(__dirname, 'img/logo.png'), 'WebViews');
   mainWindow.setFullScreen(false);
   mainWindow.maximize();
   mainWindow.once('focus', ()=> mainWindow.flashFrame(false))
   mainWindow.flashFrame(true);
+  mainWindow.webContents.openDevTools({mode: 'undocked'});
 
   /* Mobile View */
   mainWindow.addBrowserView(mobile_view)
@@ -222,6 +224,24 @@ const createWindow = async () => {
       main_view.webContents.inspectElement(event.x, event.y);
     }
   })
+
+  /* Refresh */
+  ipcMain.on('refresh', (e) => {
+    main_view.webContents.reload();
+    mobile_view.webContents.reload();
+  })
+
+  /* Zoom */
+  ipcMain.on('zoom', (event, zoom) => {
+    zoomLevel = zoom
+    if (zoomLevel < 0) {
+      zoomLevel = 0;
+    }
+    if (zoomLevel > 5) {
+      zoomLevel = 5;
+    }
+    main_view.webContents.setZoomLevel(zoomLevel);
+  })
 };
 
 // This method will be called when Electron has finished
@@ -242,7 +262,6 @@ app.setUserTasks([{
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-
     app.quit();
   }
 });
