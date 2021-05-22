@@ -14,12 +14,11 @@ const createWindow = async () => {
   const rightSize = 15;
   const screenDimensions = electron.screen.getPrimaryDisplay();
   var disableRightClick = false;
-  var zoomLevel = 0;
   /* Main Window */
   const mainWindow = new BrowserWindow({
     width: screenDimensions.size.width,
     height: screenDimensions.size.height,
-    minWidth: Number.parseInt(2.05 * screenDimensions.bounds.width / 3),
+    minWidth: Number.parseInt(2.015 * screenDimensions.bounds.width / 3),
     frame: false,
     icon: path.join(__dirname, 'img/logo.png'),
     titleBarStyle: 'hidden',
@@ -56,7 +55,6 @@ const createWindow = async () => {
   const sendInfo = (mobileWidth, mobileHeight, mainWidth, mainHeight) => {
     mainWindow.webContents.send('widthInfo', mobileWidth, mobileHeight, mainWidth, mainHeight);
   }
-
   mainWindow.removeMenu();
   mainWindow.setMenu(null);
   // and load the index.html of the app.
@@ -67,6 +65,7 @@ const createWindow = async () => {
   mainWindow.maximize();
   mainWindow.once('focus', ()=> mainWindow.flashFrame(false))
   mainWindow.flashFrame(true);
+  mainWindow.webContents.setZoomLevel(0)
   mainWindow.webContents.openDevTools({mode: 'undocked'});
 
   /* Mobile View */
@@ -79,6 +78,7 @@ const createWindow = async () => {
   })
   await mobile_view.webContents.loadURL('https://github.com')
   mobile_view.setAutoResize({width: true, height: true});
+  mobile_view.webContents.setZoomLevel(0);
   /* Handle mobile view forward backward */
   mainWindow.webContents.send("mobileId", mobile_view.webContents.id);
   mobile_view.webContents.on("did-navigate", () => {
@@ -233,14 +233,7 @@ const createWindow = async () => {
 
   /* Zoom */
   ipcMain.on('zoom', (event, zoom) => {
-    zoomLevel = zoom
-    if (zoomLevel < 0) {
-      zoomLevel = 0;
-    }
-    if (zoomLevel > 5) {
-      zoomLevel = 5;
-    }
-    main_view.webContents.setZoomLevel(zoomLevel);
+    mobile_view.webContents.setZoomLevel(zoom);    
   })
 };
 

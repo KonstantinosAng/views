@@ -1,10 +1,8 @@
 const { ipcRenderer } = require("electron");
-
 const mobile_backButton = document.getElementById("mobile_back");
 const mobile_forwardButton = document.getElementById("mobile_forward");
 const main_backButton = document.getElementById("main_back");
 const main_forwardButton = document.getElementById("main_forward");
-const mock_button = document.getElementById('mock');
 const form = document.getElementById('url_input_form');
 const input = document.getElementById('url_input');
 const message = document.getElementById('message');
@@ -16,6 +14,9 @@ const mobile_view = document.getElementById('mobile_view_block');
 const widthInfo = document.getElementById('widthInfo');
 const rightClickButton = document.getElementById('buttonRightClick');
 const refresh = document.getElementById('refresh_button');
+const zoomIn = document.getElementById('zoomIn');
+const zoomOut = document.getElementById('zoomOut');
+const slider = document.getElementById('slider');
 let mobileId = -1;
 let mainId = -1;
 
@@ -128,7 +129,7 @@ document.addEventListener('mouseup', () => {
 
 document.addEventListener('mousemove', (e) => {
   e.preventDefault();
-  if (isDown && e.clientX + x - 13 <= 450 && e.clientX + x - 13 >= 255) {
+  if (isDown && e.clientX + x - 13 <= 450 && e.clientX + x - 13 >= 235) {
     resize.style.left = (e.clientX + x -13) + 'px';
     ipcRenderer.send('resize_drag', e.clientX + x);
     main_view.style.flex = 1 -  (e.clientX + x) / window.innerWidth;
@@ -145,6 +146,7 @@ ipcRenderer.on('resize_maximize', (e, x) => {
 /* Resize on creation */
 main_view.style.flex = 1 - (resize.offsetLeft + 13) / window.innerWidth;
 mobile_view.style.flex = (resize.offsetLeft + 13) / window.innerWidth;
+input.value = 'https://github.com';
 
 /* Input select */
 
@@ -193,4 +195,7 @@ refresh.addEventListener('click', (e) => {
 })
 
 /* Zoom */
-var zoomLevel = 0;
+slider.oninput = () => {
+  console.log(slider.value);
+  ipcRenderer.send('zoom', Number.parseFloat(slider.value))
+}

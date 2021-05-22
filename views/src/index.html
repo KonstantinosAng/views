@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title> Views </title>
     <link rel="stylesheet" href="index.css">
+    <link href="nouislider.css" rel="stylesheet">
+    <script src="nouislider.js"></script>
   </head>
   <body>
     <div id="header_bar" class="header">
       <div id="mobile_view_block" class="mobile__view">
         <button id="mobile_back" class="btn-test" disabled> ← </button>
         <button id="mobile_forward" class="btn-test" disabled> → </button>
-        <button hidden id="mock"> hello </button>
         <button class="mobileDev__tools" id="mobileDevTools"> Dev Tools </button>
       </div>
       <div id="resize" class="resize__bar">
@@ -28,6 +29,11 @@
         <h3 class="info__tag" id="widthInfo"></h3>
         <div class="rightClick" id="buttonRightClick">RClick</div>
         <button class="mainDev__tools" id="mainDevTools"> Dev Tools </button>
+        <!-- <h3 id="zoomIn" class="plus"><img class="zoom_in" alt="zoomIn" src="./img/zoomIn.png"/></h3>
+        <h3 id="zoomOut" class="minus"><img class="zoom_out" alt="zoomOut" src="./img/zoomOut.png"/></h3> -->
+        <div class="slidecontainer">
+          <input type="range" min="0" max="5" value="0" class="slider" id="slider" step="0.1">
+        </div>
       </div>
     </div>
     <script src="./renderer.js"></script>
