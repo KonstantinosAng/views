@@ -20,7 +20,7 @@ const createWindow = async () => {
     height: screenDimensions.size.height,
     minWidth: Number.parseInt(2.015 * screenDimensions.bounds.width / 3),
     frame: false,
-    icon: path.join(__dirname, 'img/logo.png'),
+    icon: path.join(__dirname, '/img/logo.png'),
     titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
@@ -59,8 +59,8 @@ const createWindow = async () => {
   mainWindow.setMenu(null);
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  mainWindow.setIcon(path.join(__dirname, 'img/logo.png'));
-  mainWindow.setOverlayIcon(path.join(__dirname, 'img/logo.png'), 'WebViews');
+  mainWindow.setIcon(path.join(__dirname, '/img/logo.png'));
+  mainWindow.setOverlayIcon(path.join(__dirname, '/img/logo.png'), 'WebViews');
   mainWindow.setFullScreen(false);
   mainWindow.maximize();
   mainWindow.once('focus', ()=> mainWindow.flashFrame(false))
