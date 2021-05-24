@@ -27,22 +27,37 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "views"
+            "name": "WebViews",
+            "setupIcon": "src/img/favicon.ico",
+            "iconUrl": "https://github.com/KonstantinosAng/views/blob/master/views/src/img/favicon.ico"
           }
         },
         {
           "name": "@electron-forge/maker-zip",
           "platforms": [
             "darwin"
-          ]
+          ],
+          "config": {
+            "name": "WebViews",
+            "setupIcon": "src/img/favicon.ico",
+            "iconUrl": "https://github.com/KonstantinosAng/views/blob/master/views/src/img/favicon.ico"
+          }
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "name": "WebViews",
+            "setupIcon": "src/img/favicon.ico",
+            "iconUrl": "https://github.com/KonstantinosAng/views/blob/master/views/src/img/favicon.ico"
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "config": {
+            "name": "WebViews",
+            "setupIcon": "src/img/favicon.ico",
+            "iconUrl": "https://github.com/KonstantinosAng/views/blob/master/views/src/img/favicon.ico"
+          }
         }
       ]
     }
