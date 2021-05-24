@@ -15,6 +15,7 @@ const widthInfo = document.getElementById('widthInfo');
 const rightClickButton = document.getElementById('buttonRightClick');
 const refresh = document.getElementById('refresh_button');
 const slider = document.getElementById('slider');
+const sliderContainer = document.getElementById('slide__container');
 let mobileId = -1;
 let mainId = -1;
 
@@ -151,17 +152,17 @@ document.addEventListener('mouseup', (e) => {
 });
 
 document.addEventListener('mousemove', (e) => {
-  e.preventDefault();
-  event.stopPropagation();
-  if (isDown && e.clientX + x - 13 <= 450 && e.clientX + x - 13 >= 235) {
-    resize.style.left = (e.clientX + x -13) + 'px';
-    ipcRenderer.send('resize_drag', e.clientX + x);
-    main_view.style.flex = 1 -  (e.clientX + x) / window.innerWidth;
-    mobile_view.style.flex = (e.clientX + x) / window.innerWidth;
+  // e.preventDefault();
+  e.stopPropagation();
+  if (isDown && e.clientX + x <= 450 && e.clientX + x >= 235) {
+    resize.style.left = (e.clientX + x) + 'px';
+    ipcRenderer.send('resize_drag', e.clientX + x + 13);
+    main_view.style.flex = 1 -  (e.clientX + x + 13) / window.innerWidth;
+    mobile_view.style.flex = (e.clientX + x + 13) / window.innerWidth;
   }
   if (isClicked) {
+    console.log((sliderContainer.offsetLeft - e.clientX) / sliderContainer.offsetLeft)
     // slider.value += ( e.clientX - pos ) / 10;
-    // console.log(slider.value)
     if (e.clientX - pos > 0) {
       slider.value += 0.01;
     }
@@ -175,9 +176,9 @@ document.addEventListener('mousemove', (e) => {
 });
 
 ipcRenderer.on('resize_maximize', (e, x) => {
-  resize.style.left = (x - 13) + 'px';
-  main_view.style.flex = 1 -  x / window.innerWidth;
-  mobile_view.style.flex = x / window.innerWidth;
+  resize.style.left = x - 13 + 'px';
+  main_view.style.flex = 1 - (x + 13) / window.innerWidth;
+  mobile_view.style.flex = (x + 13) / window.innerWidth;
 })
 
 /* Resize on creation */
@@ -186,7 +187,6 @@ mobile_view.style.flex = (resize.offsetLeft + 13) / window.innerWidth;
 input.value = 'https://github.com';
 
 /* Input select */
-
 var mouseEnter = false;
 input.addEventListener('mouseenter', () => {
   mouseEnter = true;

@@ -137,6 +137,7 @@ form {
   font-size: 1.5rem;
   cursor: col-resize;
   user-select: none;
+  z-index: 10;
 }
 
 .menubar-menu-button {
