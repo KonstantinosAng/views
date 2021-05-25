@@ -161,8 +161,6 @@ document.addEventListener('mousemove', (e) => {
     mobile_view.style.flex = (e.clientX + x + 13) / window.innerWidth;
   }
   if (isClicked) {
-    console.log((sliderContainer.offsetLeft - e.clientX) / sliderContainer.offsetLeft)
-    // slider.value += ( e.clientX - pos ) / 10;
     if (e.clientX - pos > 0) {
       slider.value += 0.01;
     }
@@ -175,6 +173,12 @@ document.addEventListener('mousemove', (e) => {
   }
 });
 
+/* Update zoom slider when ctl + scroll */
+ipcRenderer.on('update-zoom-slider', (e, zoomLevel) => {
+  slider.value = zoomLevel;
+})
+
+/* resize on un/maximize enter/leave-full-screen will-resize */
 ipcRenderer.on('resize_maximize', (e, x) => {
   resize.style.left = x - 13 + 'px';
   main_view.style.flex = 1 - (x + 13) / window.innerWidth;

@@ -1,6 +1,7 @@
 const { app, BrowserWindow, BrowserView, screen, ipcMain, webContents} = require('electron');
 const path = require('path');
 const electron = require('electron');
+const { default: installExtension, REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS, VUEJS_DEVTOOLS } = require('electron-devtools-installer');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -14,6 +15,7 @@ const createWindow = async () => {
   const rightSize = 15;
   const screenDimensions = electron.screen.getPrimaryDisplay();
   var disableRightClick = false;
+  
   /* Main Window */
   const mainWindow = new BrowserWindow({
     width: screenDimensions.size.width,
@@ -26,20 +28,23 @@ const createWindow = async () => {
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,
+      webSecurity: false
     }
   });
 
   const mobile_view = new BrowserView({
     webPreferences: {
-      nodeIntegration: false,
-      sandbox: true
+      nodeIntegration: true,
+      contextIsolation: true,
+      webSecurity: false
     },
   })
 
   const main_view = new BrowserView({
     webPreferences: {
-      nodeIntegration: false,
-      sandbox: true
+      nodeIntegration: true,
+      contextIsolation: true,
+      webSecurity: false
     }
   })
 
@@ -52,12 +57,16 @@ const createWindow = async () => {
     })
   }
 
+  const resizeMaximize = (width) => {
+    mainWindow.webContents.send("resize_maximize", width);
+  }
+
   const sendInfo = (mobileWidth, mobileHeight, mainWidth, mainHeight) => {
     mainWindow.webContents.send('widthInfo', mobileWidth, mobileHeight, mainWidth, mainHeight);
   }
+
   mainWindow.removeMenu();
   mainWindow.setMenu(null);
-  // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
   mainWindow.setIcon(path.join(__dirname, '/img/logo.png'));
   mainWindow.setOverlayIcon(path.join(__dirname, '/img/logo.png'), 'WebViews');
@@ -66,24 +75,31 @@ const createWindow = async () => {
   mainWindow.once('focus', ()=> mainWindow.flashFrame(false))
   mainWindow.flashFrame(true);
   mainWindow.webContents.setZoomLevel(0)
+  mainWindow.webContents.setVisualZoomLevelLimits(1, 5);
   // mainWindow.webContents.openDevTools({mode: 'undocked'});
 
   /* Mobile View */
   mainWindow.addBrowserView(mobile_view)
+  
   mobile_view.setBounds({
     x: 0,
     y: space,
     width: Number.parseInt(mainWindow.getBounds().width / 4),
     height: mainWindow.getBounds().height + spaceBottom - space
   })
+  
   await mobile_view.webContents.loadURL('https://github.com')
   mobile_view.setAutoResize({width: true, height: true});
   mobile_view.webContents.setZoomLevel(0);
+  mobile_view.webContents.setVisualZoomLevelLimits(1, 5);
+
   /* Handle mobile view forward backward */
   mainWindow.webContents.send("mobileId", mobile_view.webContents.id);
+  
   mobile_view.webContents.on("did-navigate", () => {
     mainWindow.webContents.send("mobile_canNav", mobile_view.webContents.canGoBack(), mobile_view.webContents.canGoForward(), mobile_view.webContents.getURL());
   });
+
   ipcMain.on("mobile_goBack", (e, webContentsId) => {
     const wc = webContents.fromId(mobile_view.webContents.id);
     if (wc && wc.canGoBack()) {
@@ -99,17 +115,22 @@ const createWindow = async () => {
   
   /* Main View */
   mainWindow.addBrowserView(main_view)
+  
   main_view.setBounds({
     x: Number.parseInt(mainWindow.getBounds().width / 4),
     y: space,
     width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4 - rightSize),
     height: mainWindow.getBounds().height + spaceBottom - space
   })
+  
   await main_view.webContents.loadURL('https://github.com')
   main_view.setAutoResize({width: true, height: true});
-  
+  main_view.webContents.setZoomLevel(0);
+  main_view.webContents.setVisualZoomLevelLimits(1, 5);
+
   /* Handle main view forward backward */
   mainWindow.webContents.send("mainId", main_view.webContents.id);
+  
   main_view.webContents.on("did-navigate", () => {
     mainWindow.webContents.send("main_canNav", main_view.webContents.canGoBack(), main_view.webContents.canGoForward(), main_view.webContents.getURL());
   });
@@ -130,8 +151,9 @@ const createWindow = async () => {
   
   /* Update URL */
   ipcMain.on("getUrl", async (e, url) => {
-    await mobile_view.webContents.loadURL(url).then().catch(error=>console.log(""))
-    await main_view.webContents.loadURL(url).then().catch(error=>console.log(""))
+    await mobile_view.webContents.loadURL(url).then().catch(error=>console.log(""));
+    await main_view.webContents.loadURL(url).then().catch(error=>console.log(""));
+    mainWindow.webContents.send('update-zoom-slider', main_view.webContents.getZoomLevel());
   })
   
   /* Update Size info */
@@ -142,35 +164,35 @@ const createWindow = async () => {
     newBounds = screen.screenToDipRect(mainWindow, newBounds);
     resizeWindow(mobile_view, 0, space, Number.parseInt(newBounds.width / 4), newBounds.height + spaceBottomResize - space);
     resizeWindow(main_view, Number.parseInt(newBounds.width / 4), space, Number.parseInt(newBounds.width - newBounds.width / 4), newBounds.height + spaceBottomResize - space);
-    mainWindow.webContents.send("resize_maximize", Number.parseInt(newBounds.width / 4));
+    resizeMaximize(Number.parseInt(newBounds.width/4));
     sendInfo(Number.parseInt(newBounds.width / 4), newBounds.height + spaceBottomResize - space, Number.parseInt(newBounds.width - newBounds.width / 4), newBounds.height + spaceBottomResize - space)
   })
 
   mainWindow.on('enter-full-screen', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4 - rightSize), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
-    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+    resizeMaximize(Number.parseInt(mainWindow.getBounds().width / 4))
     sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space)
   })
 
   mainWindow.on('leave-full-screen', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
     resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
-    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+    resizeMaximize(Number.parseInt(mainWindow.getBounds().width / 4))
     sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space)
   })
 
   mainWindow.on('maximize', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
     resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4 - rightSize), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
-    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+    resizeMaximize(Number.parseInt(mainWindow.getBounds().width / 4))
     sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottom - space);
   })
 
   mainWindow.on('unmaximize', () => {
     resizeWindow(mobile_view, 0, space, Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
     resizeWindow(main_view, Number.parseInt(mainWindow.getBounds().width / 4), space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space);
-    mainWindow.webContents.send("resize_maximize", Number.parseInt(mainWindow.getBounds().width / 4));
+    resizeMaximize(Number.parseInt(mainWindow.getBounds().width / 4))
     sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space)
   })
 
@@ -229,18 +251,49 @@ const createWindow = async () => {
   ipcMain.on('refresh', (e) => {
     main_view.webContents.reload();
     mobile_view.webContents.reload();
+    mobile_view.webContents.setZoomLevel(0);
+    main_view.webContents.setZoomLevel(0);
+    mainWindow.webContents.send('update-zoom-slider', main_view.webContents.getZoomLevel());
   })
 
   /* Zoom */
   ipcMain.on('zoom', (event, zoom) => {
     mobile_view.webContents.setZoomLevel(zoom);    
   })
+
+  mobile_view.webContents.on('zoom-changed', (e, direction) => {
+    const currentZoomLevel = mobile_view.webContents.getZoomLevel();
+    if (direction === 'in') {
+      mobile_view.webContents.setZoomLevel(currentZoomLevel + 0.01);
+    }
+    if (direction === 'out') {
+      mobile_view.webContents.setZoomLevel(currentZoomLevel - 0.01);
+    }
+    mainWindow.webContents.send('update-zoom-slider', mobile_view.webContents.getZoomLevel());
+  })
+
+  main_view.webContents.on('zoom-changed', (e, direction) => {
+    const currentZoomLevel = main_view.webContents.getZoomLevel();
+    if (direction === 'in') {
+      main_view.webContents.setZoomLevel(currentZoomLevel + 0.01);
+    }
+    if (direction === 'out') {
+      main_view.webContents.setZoomLevel(currentZoomLevel - 0.01);
+    }
+    mainWindow.webContents.send('update-zoom-slider', main_view.webContents.getZoomLevel());
+  })
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', async () => {
+  // await installExtension(REACT_DEVELOPER_TOOLS).then(name => console.log('added ' + name)).catch(error => console.error("[ERROR] " + error));
+  // await installExtension(REDUX_DEVTOOLS).then(name=>console.log('added ' + name)).catch(error=>console.error("[ERROR] " + error));
+  // await installExtension(VUEJS_DEVTOOLS).then(name => console.log('added ' + name)).catch(error=>console.error("[ERROR] " + error));
+  createWindow()
+});
+
 app.setUserTasks([{
   program: process.execPath,
   arguments: '--new-window',
