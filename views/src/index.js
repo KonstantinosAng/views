@@ -28,6 +28,13 @@ const createWindow = async () => {
   ctxMenu.append(new MenuItem({label: 'Cut', role: 'cut'}))
   ctxMenu.append(new MenuItem({label: 'Undo', role: 'undo'}))
   ctxMenu.append(new MenuItem({label: 'Redo', role: 'redo'}))
+  ctxMenu.append(new MenuItem({
+    label: 'ResetZoom',
+    click: (menuItem, browserWindow, event) => {
+      main_view.webContents.setZoomLevel(0);
+      mainWindow.webContents.send('update-zoom-slider', 0);
+    }
+  }))
 
   /* Main Window */
   const mainWindow = new BrowserWindow({
@@ -262,7 +269,7 @@ const createWindow = async () => {
         main_view.webContents.openDevTools({mode: 'undocked'});
       }
       main_view.webContents.inspectElement(event.x, event.y);
-    } {
+    } else {
       ctxMenu.popup(main_view, event.x, event.y);
     }
   })
