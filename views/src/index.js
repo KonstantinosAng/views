@@ -4,11 +4,17 @@ const electron = require('electron');
 const { default: installExtension, REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS, VUEJS_DEVTOOLS } = require('electron-devtools-installer');
 const Menu = electron.Menu;
 const MenuItem = electron.MenuItem;
+const Notification = electron.Notification;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
   app.quit();
 }
+
+let main_view;
+let mobile_view;
+let mainWindow;
+let notSendNotification = true;
 
 const createWindow = async () => {
   const space = 60;
@@ -37,7 +43,7 @@ const createWindow = async () => {
   }))
 
   /* Main Window */
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: screenDimensions.size.width,
     height: screenDimensions.size.height,
     minWidth: Number.parseInt(2.015 * screenDimensions.bounds.width / 3),
@@ -52,7 +58,7 @@ const createWindow = async () => {
     }
   });
 
-  const mobile_view = new BrowserView({
+  mobile_view = new BrowserView({
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
@@ -60,7 +66,7 @@ const createWindow = async () => {
     },
   })
 
-  const main_view = new BrowserView({
+  main_view = new BrowserView({
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
@@ -319,7 +325,50 @@ app.on('ready', async () => {
   // await installExtension(REDUX_DEVTOOLS).then(name=>console.log('added ' + name)).catch(error=>console.error("[ERROR] " + error));
   // await installExtension(VUEJS_DEVTOOLS).then(name => console.log('added ' + name)).catch(error=>console.error("[ERROR] " + error));
   createWindow()
+  /* Listen for new window and alert user */
+  main_view.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures, referrer, postBody) => {
+    event.preventDefault();
+    if (frameName == '_blank') {
+      main_view.webContents.loadURL(url);     
+      showNotification()
+    }
+  })
+
+  mobile_view.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures, referrer, postBody) => {
+    event.preventDefault();
+    if (frameName == '_blank') {
+      mobile_view.webContents.loadURL(url);
+      showNotification()
+    }
+  })
 });
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function showNotification() {
+  if (notSendNotification) {
+    const options = {
+      title: 'Warning',
+      body: 'WebViews does not allow new window creation, but rather navigates the current view!',
+      silent: false,
+      icon: path.join(__dirname, '/img/logo.png'),
+      timeoutType: 'default',
+      urgency: 'critical'
+    }
+    const customNotification = new Notification(options);
+    customNotification.show();
+    notSendNotification = false;
+    sleep(5000);
+    customNotification.hide;
+  }
+}
+
+/* Set app name only for Windows */
+if (process.platform === 'win32') {
+  app.setAppUserModelId(app.name);
+}
 
 app.setUserTasks([{
   program: process.execPath,

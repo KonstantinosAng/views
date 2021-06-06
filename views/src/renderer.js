@@ -19,6 +19,9 @@ const sliderContainer = document.getElementById('slide__container');
 let mobileId = -1;
 let mainId = -1;
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 /* Handle go forth and back */
 ipcRenderer.on('mobileId', (event, _id) => {
@@ -58,10 +61,10 @@ main_forwardButton.onclick = () => {
 }
 
 /* Handle url input */
-form.onsubmit = (event) => {
+form.onsubmit = async (event) => {
   event.preventDefault();
   var url = input.value;
-  
+
   split = url.split(":")
   if (split.length === 3) {
     if (split[1] == '//localhost') {
@@ -83,6 +86,8 @@ form.onsubmit = (event) => {
     }
   } else {
     message.style.display = 'flex';
+    await sleep(1000);
+    message.style.display = 'none';
   }
 
   var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
@@ -94,6 +99,8 @@ form.onsubmit = (event) => {
   
   if (!pattern.test(url)) {    
     message.style.display = 'flex';
+    await sleep(1000);
+    message.style.display = 'none';
   } else {
     message.style.display = 'none';
     var protocol = /^((http|https|ftp):\/\/)/;

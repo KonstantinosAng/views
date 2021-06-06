@@ -85,6 +85,8 @@ form {
   font-size: 1.1rem;
   color: var(--red);
   margin-left: .5rem;
+  white-space: nowrap;
+  animation: fadeOut 1s linear forwards;
 }
 
 .mainDev__tools {
@@ -246,4 +248,15 @@ form {
 ::-moz-range-track {
   -webkit-appearance: none;
   background: var(--green);
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    pointer-events: all;
+  }
+  to {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
