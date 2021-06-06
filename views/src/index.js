@@ -2,6 +2,8 @@ const { app, BrowserWindow, BrowserView, screen, ipcMain, webContents} = require
 const path = require('path');
 const electron = require('electron');
 const { default: installExtension, REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS, VUEJS_DEVTOOLS } = require('electron-devtools-installer');
+const Menu = electron.Menu;
+const MenuItem = electron.MenuItem;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -16,6 +18,17 @@ const createWindow = async () => {
   const screenDimensions = electron.screen.getPrimaryDisplay();
   var disableRightClick = false;
   
+  /* Create context menu */
+  const template = []
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
+  const ctxMenu = new Menu()
+  ctxMenu.append(new MenuItem({label: 'Copy', role: 'copy'}))
+  ctxMenu.append(new MenuItem({label: 'Paste', role: 'paste'}))
+  ctxMenu.append(new MenuItem({label: 'Cut', role: 'cut'}))
+  ctxMenu.append(new MenuItem({label: 'Undo', role: 'undo'}))
+  ctxMenu.append(new MenuItem({label: 'Redo', role: 'redo'}))
+
   /* Main Window */
   const mainWindow = new BrowserWindow({
     width: screenDimensions.size.width,
@@ -235,6 +248,11 @@ const createWindow = async () => {
         mobile_view.webContents.openDevTools({mode:'undocked'});
       }
       mobile_view.webContents.inspectElement(event.x, event.y);
+      if (!mobile_view.webContents.isDevToolsFocused()) {
+        mobile_view.webContents.devToolsWebContents
+      }
+    } else {
+      ctxMenu.popup(mobile_view, event.x, event.y);
     }
   })
 
@@ -244,6 +262,8 @@ const createWindow = async () => {
         main_view.webContents.openDevTools({mode: 'undocked'});
       }
       main_view.webContents.inspectElement(event.x, event.y);
+    } {
+      ctxMenu.popup(main_view, event.x, event.y);
     }
   })
 
