@@ -1,4 +1,4 @@
-const { app, BrowserWindow, BrowserView, screen, ipcMain, webContents} = require('electron');
+const { app, BrowserWindow, BrowserView, screen, ipcMain, webContents, shell } = require('electron');
 const path = require('path');
 const electron = require('electron');
 const { default: installExtension, REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS, VUEJS_DEVTOOLS } = require('electron-devtools-installer');
@@ -11,22 +11,21 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
-let main_view;
-let mobile_view;
-let mainWindow;
 let notSendNotification = true;
 
-const createWindow = async () => {
+const createWindow = async (options) => {
+  
   const space = 60;
   const spaceBottom = -15;
   const spaceBottomResize = 0;
   const rightSize = 15;
-  const screenDimensions = electron.screen.getPrimaryDisplay();
   var disableRightClick = false;
-  
+  const screenDimensions = electron.screen.getPrimaryDisplay();
+  let _id;
+
   /* Create context menu */
   const template = []
-  const menu = Menu.buildFromTemplate(template)
+  const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu)
   const ctxMenu = new Menu()
   ctxMenu.append(new MenuItem({label: 'Copy', role: 'copy'}))
@@ -34,6 +33,13 @@ const createWindow = async () => {
   ctxMenu.append(new MenuItem({label: 'Cut', role: 'cut'}))
   ctxMenu.append(new MenuItem({label: 'Undo', role: 'undo'}))
   ctxMenu.append(new MenuItem({label: 'Redo', role: 'redo'}))
+  ctxMenu.append(new MenuItem({
+    label: 'Reload',
+    click: () => {
+      main_view.webContents.reload();
+      mobile_view.webContents.reload();
+    }
+  }))
   ctxMenu.append(new MenuItem({
     label: 'ResetZoom',
     click: (menuItem, browserWindow, event) => {
@@ -43,37 +49,109 @@ const createWindow = async () => {
   }))
 
   /* Main Window */
-  mainWindow = new BrowserWindow({
-    width: screenDimensions.size.width,
-    height: screenDimensions.size.height,
-    minWidth: Number.parseInt(2.015 * screenDimensions.bounds.width / 3),
-    frame: false,
-    icon: path.join(__dirname, '/img/logo.png'),
-    titleBarStyle: 'hidden',
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
-      webSecurity: false
-    }
-  });
+  let mainWindow;
+  /* Resize if window i a new tab */
+  if (options) {
+    mainWindow = new BrowserWindow({
+      webContents: options.webContents,
+      width: Number.parseInt(2.015 * screenDimensions.bounds.width / 3),
+      height: Number.parseInt(2 * screenDimensions.size.height / 3),
+      minWidth: Number.parseInt(2.015 * screenDimensions.bounds.width / 3),
+      frame: false,
+      icon: path.join(__dirname, '/img/logo.png'),
+      titleBarStyle: 'hidden',
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false,
+        enableRemoteModule: true,
+        webSecurity: false
+      }
+    });
+  } else {
+     mainWindow = new BrowserWindow({
+      width: screenDimensions.size.width,
+      height: screenDimensions.size.height,
+      minWidth: Number.parseInt(2.015 * screenDimensions.bounds.width / 3),
+      frame: false,
+      icon: path.join(__dirname, '/img/logo.png'),
+      titleBarStyle: 'hidden',
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false,
+        enableRemoteModule: true,
+        webSecurity: false
+      }
+    });
+  }
 
-  mobile_view = new BrowserView({
+  mainWindow.removeMenu();
+  mainWindow.setMenu(null);
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  mainWindow.setIcon(path.join(__dirname, '/img/logo.png'));
+  mainWindow.setOverlayIcon(path.join(__dirname, '/img/logo.png'), 'WebViews');
+  mainWindow.setFullScreen(false);
+  if (!options) {
+    mainWindow.maximize();
+  }
+  mainWindow.once('focus', () => mainWindow.flashFrame(false))
+  mainWindow.flashFrame(true);
+  mainWindow.webContents.setZoomLevel(0)
+  mainWindow.webContents.setVisualZoomLevelLimits(1, 5);
+  // mainWindow.webContents.openDevTools({mode: 'undocked'});
+  
+  /* Create two views */
+  
+  /* Mobile View */
+  const mobile_view = new BrowserView({
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
       webSecurity: false
     },
   })
+  mainWindow.addBrowserView(mobile_view)
 
-  main_view = new BrowserView({
+  mobile_view.setBounds({
+    x: 0,
+    y: space,
+    width: Number.parseInt(mainWindow.getBounds().width / 4),
+    height: mainWindow.getBounds().height + spaceBottom - space
+  })
+
+  await mobile_view.webContents.loadURL('https://github.com')
+  mobile_view.setAutoResize({
+    width: true,
+    height: true
+  });
+  mobile_view.webContents.setZoomLevel(0);
+  mobile_view.webContents.setVisualZoomLevelLimits(1, 5);
+  
+  /* Main View */
+  const main_view = new BrowserView({
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
       webSecurity: false
     }
   })
+  mainWindow.addBrowserView(main_view)
 
+  main_view.setBounds({
+    x: Number.parseInt(mainWindow.getBounds().width / 4),
+    y: space,
+    width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4 - rightSize),
+    height: mainWindow.getBounds().height + spaceBottom - space
+  })
+
+  await main_view.webContents.loadURL('https://github.com')
+  main_view.setAutoResize({
+    width: true,
+    height: true
+  });
+  main_view.webContents.setZoomLevel(0);
+  main_view.webContents.setVisualZoomLevelLimits(1, 5);
+
+  /* Function to resize views */
   const resizeWindow = (view, x, y, width, height) => {
     view.setBounds({
       x: x,
@@ -83,45 +161,24 @@ const createWindow = async () => {
     })
   }
 
+  /* Update slider position on un/maximize full-screen will-resize */
   const resizeMaximize = (width) => {
     mainWindow.webContents.send("resize_maximize", width);
   }
 
+  /* Update dimensions info */
   const sendInfo = (mobileWidth, mobileHeight, mainWidth, mainHeight) => {
     mainWindow.webContents.send('widthInfo', mobileWidth, mobileHeight, mainWidth, mainHeight);
   }
 
-  mainWindow.removeMenu();
-  mainWindow.setMenu(null);
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  mainWindow.setIcon(path.join(__dirname, '/img/logo.png'));
-  mainWindow.setOverlayIcon(path.join(__dirname, '/img/logo.png'), 'WebViews');
-  mainWindow.setFullScreen(false);
-  mainWindow.maximize();
-  mainWindow.once('focus', ()=> mainWindow.flashFrame(false))
-  mainWindow.flashFrame(true);
-  mainWindow.webContents.setZoomLevel(0)
-  mainWindow.webContents.setVisualZoomLevelLimits(1, 5);
-  // mainWindow.webContents.openDevTools({mode: 'undocked'});
-
-  /* Mobile View */
-  mainWindow.addBrowserView(mobile_view)
-  
-  mobile_view.setBounds({
-    x: 0,
-    y: space,
-    width: Number.parseInt(mainWindow.getBounds().width / 4),
-    height: mainWindow.getBounds().height + spaceBottom - space
+  /* Update _id for different browsers, to differentiate communication */
+  ipcMain.on('idInfo', (e, id) => {
+    _id = id;
   })
-  
-  await mobile_view.webContents.loadURL('https://github.com')
-  mobile_view.setAutoResize({width: true, height: true});
-  mobile_view.webContents.setZoomLevel(0);
-  mobile_view.webContents.setVisualZoomLevelLimits(1, 5);
 
   /* Handle mobile view forward backward */
   mainWindow.webContents.send("mobileId", mobile_view.webContents.id);
-  
+
   mobile_view.webContents.on("did-navigate", () => {
     mainWindow.webContents.send("mobile_canNav", mobile_view.webContents.canGoBack(), mobile_view.webContents.canGoForward(), mobile_view.webContents.getURL());
   });
@@ -139,24 +196,9 @@ const createWindow = async () => {
       wc.goForward();
   }})
   
-  /* Main View */
-  mainWindow.addBrowserView(main_view)
-  
-  main_view.setBounds({
-    x: Number.parseInt(mainWindow.getBounds().width / 4),
-    y: space,
-    width: Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4 - rightSize),
-    height: mainWindow.getBounds().height + spaceBottom - space
-  })
-  
-  await main_view.webContents.loadURL('https://github.com')
-  main_view.setAutoResize({width: true, height: true});
-  main_view.webContents.setZoomLevel(0);
-  main_view.webContents.setVisualZoomLevelLimits(1, 5);
-
   /* Handle main view forward backward */
   mainWindow.webContents.send("mainId", main_view.webContents.id);
-  
+
   main_view.webContents.on("did-navigate", () => {
     mainWindow.webContents.send("main_canNav", main_view.webContents.canGoBack(), main_view.webContents.canGoForward(), main_view.webContents.getURL());
   });
@@ -176,10 +218,13 @@ const createWindow = async () => {
   })
   
   /* Update URL */
-  ipcMain.on("getUrl", async (e, url) => {
-    await mobile_view.webContents.loadURL(url).then().catch(error=>console.log(""));
-    await main_view.webContents.loadURL(url).then().catch(error=>console.log(""));
-    mainWindow.webContents.send('update-zoom-slider', main_view.webContents.getZoomLevel());
+  mainWindow.webContents.send('id', mainWindow.webContents.id)
+  ipcMain.on("getUrl", async (e, url, id) => {
+    if (id === mainWindow.webContents.id) {
+      await mobile_view.webContents.loadURL(url).then().catch(error=>console.log(""));
+      await main_view.webContents.loadURL(url).then().catch(error=>console.log(""));
+      mainWindow.webContents.send('update-zoom-slider', main_view.webContents.getZoomLevel());
+    }
   })
   
   /* Update Size info */
@@ -222,14 +267,16 @@ const createWindow = async () => {
     sendInfo(Number.parseInt(mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - mainWindow.getBounds().width / 4), mainWindow.getBounds().height + spaceBottomResize - space)
   })
 
-  ipcMain.on("resize_drag", (e, x) => {
-    resizeWindow(mobile_view, 0, space, Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space);
-    if (mainWindow.webContents.isMaximize) {
-      resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x - rightSize), mainWindow.getBounds().height + spaceBottomResize - space);
-      sendInfo(Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - x - rightSize), mainWindow.getBounds().height + spaceBottomResize - space)
-    } else {
-      resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x), mainWindow.getBounds().height + spaceBottomResize - space);
-      sendInfo(Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - x), mainWindow.getBounds().height + spaceBottomResize - space)
+  ipcMain.on("resize_drag", (e, x, _id) => {
+    if (mainWindow.webContents.id === _id) {
+      resizeWindow(mobile_view, 0, space, Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space);
+      if (mainWindow.webContents.isMaximize) {
+        resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x - rightSize), mainWindow.getBounds().height + spaceBottomResize - space);
+        sendInfo(Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - x - rightSize), mainWindow.getBounds().height + spaceBottomResize - space)
+      } else {
+        resizeWindow(main_view, Number.parseInt(x), space, Number.parseInt(mainWindow.getBounds().width - x), mainWindow.getBounds().height + spaceBottomResize - space);
+        sendInfo(Number.parseInt(x), mainWindow.getBounds().height + spaceBottomResize - space, Number.parseInt(mainWindow.getBounds().width - x), mainWindow.getBounds().height + spaceBottomResize - space)
+      }
     }
   })
 
@@ -251,8 +298,10 @@ const createWindow = async () => {
   })
 
   /* Ispect Elements */
-  ipcMain.on('listenRightClick', (e, toggle) => {
-    disableRightClick = toggle;
+  ipcMain.on('listenRightClick', (e, toggle, _id) => {
+    if (mainWindow.webContents.id === _id) {
+      disableRightClick = toggle;
+    }
   })
 
   mobile_view.webContents.addListener('context-menu', (e, event) => {
@@ -261,9 +310,6 @@ const createWindow = async () => {
         mobile_view.webContents.openDevTools({mode:'undocked'});
       }
       mobile_view.webContents.inspectElement(event.x, event.y);
-      if (!mobile_view.webContents.isDevToolsFocused()) {
-        mobile_view.webContents.devToolsWebContents
-      }
     } else {
       ctxMenu.popup(mobile_view, event.x, event.y);
     }
@@ -281,17 +327,19 @@ const createWindow = async () => {
   })
 
   /* Refresh */
-  ipcMain.on('refresh', (e) => {
-    main_view.webContents.reload();
-    mobile_view.webContents.reload();
-    mobile_view.webContents.setZoomLevel(0);
-    main_view.webContents.setZoomLevel(0);
-    mainWindow.webContents.send('update-zoom-slider', main_view.webContents.getZoomLevel());
+  ipcMain.on('refresh', (e, _id) => {
+    if (mainWindow.webContents.id === _id) {
+      main_view.webContents.reload();
+      mobile_view.webContents.reload();
+      mobile_view.webContents.setZoomLevel(0);
+      main_view.webContents.setZoomLevel(0);
+      mainWindow.webContents.send('update-zoom-slider', main_view.webContents.getZoomLevel());
+    }
   })
 
   /* Zoom */
   ipcMain.on('zoom', (event, zoom) => {
-    mobile_view.webContents.setZoomLevel(zoom);    
+    mobile_view.webContents.setZoomLevel(zoom);
   })
 
   mobile_view.webContents.on('zoom-changed', (e, direction) => {
@@ -315,43 +363,76 @@ const createWindow = async () => {
     }
     mainWindow.webContents.send('update-zoom-slider', main_view.webContents.getZoomLevel());
   })
+
+  /* Return created window & views */
+  return {
+    window: mainWindow,
+    mobileView: mobile_view,
+    mainView: main_view
+  }
+
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
   // await installExtension(REACT_DEVELOPER_TOOLS).then(name => console.log('added ' + name)).catch(error => console.error("[ERROR] " + error));
   // await installExtension(REDUX_DEVTOOLS).then(name=>console.log('added ' + name)).catch(error=>console.error("[ERROR] " + error));
   // await installExtension(VUEJS_DEVTOOLS).then(name => console.log('added ' + name)).catch(error=>console.error("[ERROR] " + error));
-  createWindow()
+  
+  mainInstance = await createWindow()
+
   /* Listen for new window and alert user */
-  main_view.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures, referrer, postBody) => {
+  mainInstance.mainView.webContents.on('new-window', async (event, url, frameName, disposition, options, additionalFeatures, referrer, postBody) => {
     event.preventDefault();
+    /* Create new window */
+    const newInstance = await createWindow(options);
+    
+    newInstance.window.once('ready-to-show', () => newInstance.window.show())
+    
+    if (!options.webContents) {
+      newInstance.mobileView.webContents.loadURL(url) // existing webContents will be navigated automatically
+      newInstance.mainView.webContents.loadURL(url) // existing webContents will be navigated automatically
+    }
+    
+    event.newGuest = newInstance.window
+
     if (frameName == '_blank') {
-      main_view.webContents.loadURL(url);     
       showNotification()
     }
   })
+  
+  /* Listen for new window and alert user */
+  mainInstance.mobileView.webContents.on('new-window', async (event, url, frameName, disposition, options, additionalFeatures, referrer, postBody) => {
+  
+    event.preventDefault();  
+    /* Create new window */
+    const newInstance = await createWindow(options);
+    
+    newInstance.window.once('ready-to-show', () => newInstance.window.show())
+    
+    if (!options.webContents) {
+      newInstance.mobileView.webContents.loadURL(url)
+      newInstance.mainView.webContents.loadURL(url) 
+    }
+    
+    event.newGuest = newInstance.window
 
-  mobile_view.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures, referrer, postBody) => {
-    event.preventDefault();
     if (frameName == '_blank') {
-      mobile_view.webContents.loadURL(url);
       showNotification()
     }
   })
 });
 
+/* Sleep function */
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/* Show notification, works on Windows, Linux and MacOS */
 function showNotification() {
   if (notSendNotification) {
     const options = {
       title: 'Warning',
-      body: 'WebViews does not allow new window creation, but rather navigates the current view!',
+      body: 'WebViews Opens (_blank) links in new Browser instances!',
       silent: false,
       icon: path.join(__dirname, '/img/logo.png'),
       timeoutType: 'default',
@@ -370,6 +451,7 @@ if (process.platform === 'win32') {
   app.setAppUserModelId(app.name);
 }
 
+/* Set options when click the taskbar icon */
 app.setUserTasks([{
   program: process.execPath,
   arguments: '--new-window',
@@ -379,22 +461,16 @@ app.setUserTasks([{
   description: 'Create a new WebView Window'
 }])
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+/* Quit everything when browser closes */
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
+/* Create window again when dock icon is clicked, only for MacOS */
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.

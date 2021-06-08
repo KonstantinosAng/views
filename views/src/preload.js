@@ -6,4 +6,4 @@ let MyTitleBar = new customTitlebar.Titlebar({
   icon: './favicon.png',
 });
 
-MyTitleBar.updateTitle('Views');
+MyTitleBar.updateTitle('WebViews');

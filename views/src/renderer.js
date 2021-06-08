@@ -18,20 +18,32 @@ const slider = document.getElementById('slider');
 const sliderContainer = document.getElementById('slide__container');
 let mobileId = -1;
 let mainId = -1;
+let state = {id: -1};
 
+/* Sleep function */
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/* Handle go forth and back */
+/* Listen for id */
+ipcRenderer.on('id', (event, _id) => {
+  state.id = _id;
+})
+
+/* Send id */
+ipcRenderer.send('idInfo', state.id);
+
+/* Store mobile Id for its session */
 ipcRenderer.on('mobileId', (event, _id) => {
   mobileId = _id;
 })
 
+/* Store mainView Id for its session */
 ipcRenderer.on('mainId', (event, _id) => {
   mainId = _id;
 })
 
+/* Handle go forth and back */
 ipcRenderer.on('mobile_canNav', (event, canBack, canForward, url) => {
   mobile_backButton.disabled = !canBack;
   mobile_forwardButton.disabled = !canForward;
@@ -64,7 +76,6 @@ main_forwardButton.onclick = () => {
 form.onsubmit = async (event) => {
   event.preventDefault();
   var url = input.value;
-
   split = url.split(":")
   if (split.length === 3) {
     if (split[1] == '//localhost') {
@@ -107,16 +118,37 @@ form.onsubmit = async (event) => {
     if (!protocol.test(url)) {
       url = "https://www." + url;
     }
-    ipcRenderer.send('getUrl', url)
+    ipcRenderer.send('getUrl', url, state.id)
   }
 }
 
+/* Input select */
+var mouseEnter = false;
+input.addEventListener('mouseenter', () => {
+  mouseEnter = true;
+  mouseLeft = false;
+})
+
+input.addEventListener('click', () => {
+  if (mouseEnter && !mouseLeft) {
+    input.focus();
+    input.select();
+    mouseLeft = true;
+  }
+})
+
+var mouseLeft = false;
+input.addEventListener('mouseleave', () => {
+  mouseLeft = true;
+  mouseEnter = false;
+})
+
 /* Dev tools */
-mainDevTools.onclick = (event) => {
+mainDevTools.onclick = () => {
   ipcRenderer.send("mainDevTools");
 }
 
-mobileDevTools.onclick = (event) => {
+mobileDevTools.onclick = () => {
   ipcRenderer.send("mobileDevTools");
 }
 
@@ -163,7 +195,7 @@ document.addEventListener('mousemove', (e) => {
   e.stopPropagation();
   if (isDown && e.clientX + x <= 450 && e.clientX + x >= 235) {
     resize.style.left = (e.clientX + x) + 'px';
-    ipcRenderer.send('resize_drag', e.clientX + x + 13);
+    ipcRenderer.send('resize_drag', e.clientX + x + 13, state.id);
     main_view.style.flex = 1 -  (e.clientX + x + 13) / window.innerWidth;
     mobile_view.style.flex = (e.clientX + x + 13) / window.innerWidth;
   }
@@ -197,37 +229,17 @@ main_view.style.flex = 1 - (resize.offsetLeft + 13) / window.innerWidth;
 mobile_view.style.flex = (resize.offsetLeft + 13) / window.innerWidth;
 input.value = 'https://github.com';
 
-/* Input select */
-var mouseEnter = false;
-input.addEventListener('mouseenter', () => {
-  mouseEnter = true;
-  mouseLeft = false;
-})
-
-input.addEventListener('click', () => {
-  if (mouseEnter && !mouseLeft) {
-    input.focus();
-    input.select();
-    mouseLeft = true;
-  }
-})
-
-var mouseLeft = false;
-input.addEventListener('mouseleave', () => {
-  mouseLeft = true;
-  mouseEnter = false;
-})
-
 /* Width info update */
 ipcRenderer.on('widthInfo', (e, mobileWidth, mobileHeight, mainWidth, mainHeight) => {
   widthInfo.innerText = mobileWidth + 'x' + mobileHeight + ' || ' + mainWidth + 'x' + mainHeight;
 })
 
+/* Right Click prevent */
 var toggle = false;
 rightClickButton.addEventListener('click', (e) => {
   e.preventDefault();
   toggle = !toggle;
-  ipcRenderer.send('listenRightClick', toggle);
+  ipcRenderer.send('listenRightClick', toggle, state.id);
   if (toggle) {
     rightClickButton.style.background = '#238D3D';
     rightClickButton.style.border = '2px solid #238D3D';
@@ -239,5 +251,5 @@ rightClickButton.addEventListener('click', (e) => {
 
 /* Refresh */
 refresh.addEventListener('click', (e) => {
-  ipcRenderer.send('refresh');
+  ipcRenderer.send('refresh', state.id);
 })
