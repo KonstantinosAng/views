@@ -64,7 +64,8 @@ const createWindow = async (options) => {
         nodeIntegration: true,
         contextIsolation: false,
         enableRemoteModule: true,
-        webSecurity: false
+        webSecurity: false,
+        nativeWindowOpen: true
       }
     });
   } else {
@@ -79,7 +80,8 @@ const createWindow = async (options) => {
         nodeIntegration: true,
         contextIsolation: false,
         enableRemoteModule: true,
-        webSecurity: false
+        webSecurity: false,
+        nativeWindowOpen: true
       }
     });
   }
