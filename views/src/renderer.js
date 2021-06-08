@@ -80,19 +80,19 @@ form.onsubmit = async (event) => {
   if (split.length === 3) {
     if (split[1] == '//localhost') {
       message.style.display = 'none';
-      ipcRenderer.send('getUrl', "http://www." + url)
+      ipcRenderer.send('getUrl', "http://www." + url, state.id)
       return
     }
   } else if (split.length === 2) {
     if (split[0] == 'localhost') {
       message.style.display = 'none';
-      ipcRenderer.send('getUrl', "http://www." + url)
+      ipcRenderer.send('getUrl', "http://www." + url, state.id)
       return
     }
   } else if (split.length === 1) {
     if (split[0] == 'localhost') {
       message.style.display = 'none';
-      ipcRenderer.send('getUrl', "http://www." + url)
+      ipcRenderer.send('getUrl', "http://www." + url, state.id)
       return
     }
   } else {
